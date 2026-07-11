@@ -1,0 +1,27 @@
+---
+title: "TypeScript Tips I Reach For Daily"
+description: "Small, high-leverage TypeScript patterns that make everyday code safer and easier to read."
+date: "2025-04-30"
+tags: ["typescript", "tips", "tools"]
+views: 8043
+published: true
+---
+
+You don't need advanced type gymnastics to get most of TypeScript's value. These
+few patterns cover the majority of my day-to-day.
+
+## `as const` for literal unions
+
+```ts
+const sizes = ["sm", "md", "lg"] as const;
+type Size = (typeof sizes)[number]; // "sm" | "md" | "lg"
+```
+
+## `satisfies` to keep inference
+
+Validate a value against a type without widening it — you keep the precise literal
+types while still catching mistakes.
+
+## Prefer `unknown` over `any`
+
+`unknown` forces you to narrow before use, which is exactly the safety you wanted.

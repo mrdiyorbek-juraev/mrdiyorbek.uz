@@ -1,0 +1,23 @@
+---
+title: "A Tailwind Setup That Scales"
+description: "How I structure design tokens, variants, and components so Tailwind stays maintainable as a project grows."
+date: "2025-02-14"
+tags: ["tailwindcss", "css", "design", "setup"]
+views: 6120
+published: true
+---
+
+Tailwind gets a bad rap for "messy class soup." Most of that comes from skipping
+a token layer. Here's the setup I reach for.
+
+## Tokens first
+
+Define semantic CSS variables (`--background`, `--primary`, `--radius`) and map
+them into the theme. Components reference intent, not raw values.
+
+## Extract only when it repeats
+
+Don't abstract early. When a pattern appears three times, pull it into a
+component or a small utility — not before.
+
+> Utilities are cheap. Abstractions are expensive. Pay for them only when used.

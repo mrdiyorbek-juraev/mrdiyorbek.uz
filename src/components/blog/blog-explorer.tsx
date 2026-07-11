@@ -1,0 +1,213 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Search, Newspaper, CalendarDays, Check, ChevronsUpDown } from "lucide-react";
+
+import type { PostMeta } from "@/lib/blog";
+import { cn } from "@/lib/utils";
+import { PostRow } from "@/components/post-row";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type SortKey = "date-desc" | "date-asc" | "views";
+
+const sortLabels: Record<SortKey, string> = {
+  "date-desc": "Sort by date",
+  "date-asc": "Oldest first",
+  views: "Most viewed",
+};
+
+export function BlogExplorer({ posts }: { posts: PostMeta[] }) {
+  const [query, setQuery] = React.useState("");
+  const [active, setActive] = React.useState<string[]>([]);
+  const [sort, setSort] = React.useState<SortKey>("date-desc");
+  const searchRef = React.useRef<HTMLInputElement>(null);
+
+  // Unique topics, ordered by frequency then alphabetically.
+  const topics = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of posts)
+      for (const t of p.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([t]) => t);
+  }, [posts]);
+
+  const toggleTopic = (t: string) =>
+    setActive((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+    );
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const result = posts.filter((p) => {
+      const matchesQuery =
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.toLowerCase().includes(q));
+      const matchesTopics =
+        active.length === 0 || active.some((t) => p.tags.includes(t));
+      return matchesQuery && matchesTopics;
+    });
+    result.sort((a, b) => {
+      if (sort === "views") return b.views - a.views;
+      const diff = +new Date(a.date) - +new Date(b.date);
+      return sort === "date-asc" ? diff : -diff;
+    });
+    return result;
+  }, [posts, query, active, sort]);
+
+  // "Shift + S" focuses search.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      const typing =
+        el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+      if (e.shiftKey && (e.key === "S" || e.key === "s") && !typing) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <div className="mx-auto w-full max-w-5xl px-6 pb-24 pt-32">
+      {/* Header */}
+      <div className="flex flex-col items-center text-center">
+        <span className="flex size-11 items-center justify-center rounded-xl border border-border/60 bg-card/60 text-muted-foreground">
+          <Newspaper className="size-5" />
+        </span>
+        <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
+          The <span className="text-primary">Blog</span>
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          Thoughts, mental models, and tutorials about front-end development.
+        </p>
+
+        <div className="relative mt-6 w-full max-w-xl">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            ref={searchRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search..."
+            className="h-12 rounded-xl bg-card/50 pl-11 pr-20"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1 text-xs text-muted-foreground">
+            <kbd className="rounded border border-border/70 bg-secondary/60 px-1.5 py-0.5">
+              Shift
+            </kbd>
+            <kbd className="rounded border border-border/70 bg-secondary/60 px-1.5 py-0.5">
+              S
+            </kbd>
+          </span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_16rem]">
+        {/* Posts */}
+        <div className="min-w-0">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((post) => (
+              <motion.div
+                key={post.slug}
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <PostRow post={post} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {filtered.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border/60 py-16 text-center text-muted-foreground">
+              No posts match your search.
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-8 lg:sticky lg:top-28 lg:self-start">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-card/50 px-3 py-2.5 text-sm transition-colors hover:border-brand/40">
+              <span className="inline-flex items-center gap-2">
+                <CalendarDays className="size-4 text-muted-foreground" />
+                {sortLabels[sort]}
+              </span>
+              <ChevronsUpDown className="size-4 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuRadioGroup
+                value={sort}
+                onValueChange={(v) => setSort(v as SortKey)}
+              >
+                {(Object.keys(sortLabels) as SortKey[]).map((key) => (
+                  <DropdownMenuRadioItem key={key} value={key}>
+                    {sortLabels[key]}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-medium">Choose topics</h2>
+              {active.length > 0 && (
+                <button
+                  onClick={() => setActive([])}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Check className="size-3" /> Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {topics.map((topic) => {
+                const on = active.includes(topic);
+                return (
+                  <button
+                    key={topic}
+                    onClick={() => toggleTopic(topic)}
+                    className={cn(
+                      "rounded-md border px-2.5 py-1 text-xs transition-colors",
+                      on
+                        ? "border-brand/50 bg-brand/10 text-primary"
+                        : "border-border/60 bg-secondary/40 text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {topic}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="mb-2 font-medium">Read in other language?</h2>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground transition-colors hover:text-primary"
+            >
+              Read in Bahasa Indonesia
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}

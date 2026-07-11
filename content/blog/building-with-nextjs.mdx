@@ -1,0 +1,40 @@
+---
+title: "Building This Site with Next.js and shadcn/ui"
+description: "A look at the stack behind this portfolio blog and why I chose each piece."
+date: "2026-07-05"
+tags: ["nextjs", "tailwind", "shadcn"]
+views: 9778
+published: true
+---
+
+I wanted a portfolio that was fast, easy to write for, and simple to maintain.
+Here's the stack I landed on.
+
+## The stack
+
+- **Next.js (App Router)** — server components, static generation, great DX.
+- **Tailwind CSS v4** — utility-first styling with almost no config.
+- **shadcn/ui** — accessible components I own and can customize.
+- **MDX** — posts are just files in the repo, versioned with the code.
+
+## Content as files
+
+Each post lives in `content/blog` as an `.mdx` file with frontmatter:
+
+```md
+---
+title: "My Post"
+description: "..."
+date: "2026-07-05"
+tags: ["nextjs"]
+published: true
+---
+```
+
+A small library reads these at build time, sorts by date, and renders them.
+No database, no CMS — just Markdown I can edit anywhere.
+
+## What's next
+
+I'll keep iterating on the design and add features like tags pages, an RSS feed,
+and search as the content grows. For now, it does exactly what I need.

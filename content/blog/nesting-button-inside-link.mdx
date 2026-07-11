@@ -1,0 +1,26 @@
+---
+title: "Nesting a Button Inside a Link"
+description: "Discover whether you can nest a <button> element inside an <a> tag — and what to do instead."
+date: "2024-09-28"
+tags: ["web", "react", "html"]
+views: 4325
+published: true
+---
+
+Short answer: **you shouldn't**. Interactive elements can't be nested per the
+HTML spec, and it breaks accessibility.
+
+## Why it breaks
+
+An `<a>` and a `<button>` are both interactive. Nesting them creates ambiguous
+semantics — screen readers and keyboards don't know which control they're on.
+
+```html
+<!-- ❌ invalid -->
+<a href="/x"><button>Go</button></a>
+```
+
+## What to do instead
+
+Style a single element as the thing you need, or place them as siblings and
+position with CSS.
