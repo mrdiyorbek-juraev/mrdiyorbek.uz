@@ -2,11 +2,18 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, Mail, Atom, Braces, Boxes, Sparkles, Zap } from "lucide-react";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import { ArrowRight, Mail } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
-import { Button } from "@/components/ui/button";
 import { GitHubIcon, XIcon } from "@/components/icons";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -23,160 +30,133 @@ const item = {
 export function Hero() {
   const reduce = useReducedMotion();
   const ref = React.useRef<HTMLDivElement>(null);
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
-  const visualY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 120]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -40]);
+  const fade = useTransform(scrollYProgress, [0, 0.8], [1, reduce ? 1 : 0.35]);
+
+  // Cursor-tracked spotlight over the backdrop.
+  const mx = useSpring(useMotionValue(50), { stiffness: 60, damping: 20 });
+  const my = useSpring(useMotionValue(40), { stiffness: 60, damping: 20 });
+  const spotlight = useMotionTemplate`radial-gradient(38rem 30rem at ${mx}% ${my}%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 70%)`;
+
+  function onPointerMove(e: React.PointerEvent<HTMLElement>) {
+    if (reduce) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    mx.set(((e.clientX - r.left) / r.width) * 100);
+    my.set(((e.clientY - r.top) / r.height) * 100);
+  }
 
   return (
     <section
       ref={ref}
+      onPointerMove={onPointerMove}
       className="relative flex min-h-[92vh] items-center overflow-hidden"
     >
-      {/* Backdrop */}
+      {/* ---- Backdrop ---- */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-grid mask-radial-fade opacity-70" />
-        <div className="absolute left-1/2 top-1/3 -z-10 h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-brand/10 blur-[120px]" />
-      </div>
-
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-6 pt-28 lg:grid-cols-2 lg:pt-24">
-        {/* Left: copy */}
-        <motion.div
-          style={{ y: textY }}
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="max-w-xl"
-        >
-          <motion.div variants={item}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-3.5 py-1.5 text-sm text-foreground/90 brand-glow">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand/70" />
-                <span className="relative inline-flex size-2 rounded-full bg-brand" />
-              </span>
-              {siteConfig.status}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            variants={item}
-            className="mt-6 text-5xl font-bold tracking-tight text-gradient sm:text-6xl"
-          >
-            I&apos;m {siteConfig.name}
-          </motion.h1>
-
-          <motion.p
-            variants={item}
-            className="mt-5 text-lg leading-relaxed text-muted-foreground"
-          >
-            {siteConfig.description}
-          </motion.p>
-
-          <motion.div variants={item} className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="rounded-full">
-              <Link href="/blog">
-                Learn How <ArrowDown className="size-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full">
-              <Link href="/about">More about me</Link>
-            </Button>
-          </motion.div>
-
-          <motion.div
-            variants={item}
-            className="mt-8 flex items-center gap-3 text-muted-foreground"
-          >
-            <a
-              href={siteConfig.social.github}
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label="GitHub"
-              className="transition-colors hover:text-primary"
-            >
-              <GitHubIcon className="size-5" />
-            </a>
-            <a
-              href={siteConfig.social.twitter}
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label="X (Twitter)"
-              className="transition-colors hover:text-primary"
-            >
-              <XIcon className="size-5" />
-            </a>
-            <a
-              href={`mailto:${siteConfig.social.email}`}
-              aria-label="Email"
-              className="transition-colors hover:text-primary"
-            >
-              <Mail className="size-5" />
-            </a>
-          </motion.div>
-        </motion.div>
-
-        {/* Right: isometric visual */}
-        <motion.div
-          style={{ y: visualY }}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease, delay: 0.15 }}
-          className="relative hidden h-[26rem] lg:block"
-          aria-hidden
-        >
-          <IsometricVisual />
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-const tiles = [
-  { Icon: Atom, x: "10%", y: "18%", d: 0 },
-  { Icon: Braces, x: "58%", y: "6%", d: 0.4 },
-  { Icon: Boxes, x: "70%", y: "48%", d: 0.8 },
-  { Icon: Zap, x: "22%", y: "56%", d: 1.2 },
-  { Icon: Sparkles, x: "42%", y: "30%", d: 0.6 },
-];
-
-function IsometricVisual() {
-  const reduce = useReducedMotion();
-  return (
-    <div className="absolute inset-0 flex items-center justify-center [perspective:1200px]">
-      <div className="relative size-[24rem] [transform:rotateX(52deg)_rotateZ(-42deg)] [transform-style:preserve-3d]">
-        {/* Platform */}
-        <div className="absolute inset-0 rounded-[2rem] border border-brand/20 bg-card/40 bg-grid shadow-2xl shadow-black/40" />
-        <div className="absolute inset-6 rounded-3xl border border-border/50" />
-
-        {/* Floating icon tiles */}
-        {tiles.map(({ Icon, x, y, d }, i) => (
-          <motion.div
-            key={i}
-            className="absolute flex size-16 items-center justify-center rounded-2xl border border-border/60 bg-secondary/80 text-primary shadow-xl shadow-black/40 backdrop-blur"
-            style={{ left: x, top: y }}
-            initial={{ z: 60 }}
-            animate={reduce ? { z: 60 } : { z: [60, 96, 60] }}
-            transition={{
-              duration: 3.6,
-              delay: d,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <Icon className="size-7" />
-          </motion.div>
-        ))}
-
-        {/* hello world tag */}
-        <div
-          className="absolute left-[4%] top-[70%] rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1 text-xs font-medium text-primary"
-          style={{ transform: "translateZ(80px)" }}
-        >
-          hello world
+        {/* Aurora mesh */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="aurora-a absolute -left-[10%] top-[-10%] size-[42rem] rounded-full bg-[radial-gradient(circle_at_center,var(--brand),transparent_65%)] opacity-25 blur-[110px] dark:opacity-30" />
+          <div className="aurora-b absolute right-[-8%] top-[6%] size-[36rem] rounded-full bg-[radial-gradient(circle_at_center,var(--chart-2),transparent_65%)] opacity-20 blur-[120px] dark:opacity-25" />
+          <div className="aurora-c absolute bottom-[-18%] left-[28%] size-[40rem] rounded-full bg-[radial-gradient(circle_at_center,var(--chart-3),transparent_65%)] opacity-15 blur-[130px] dark:opacity-20" />
         </div>
+
+        {/* Grid + cursor spotlight */}
+        <div className="absolute inset-0 bg-grid mask-radial-fade opacity-60" />
+        <motion.div style={{ background: spotlight }} className="absolute inset-0" />
+
+        {/* Grain, then a fade into the next section */}
+        <div className="absolute inset-0 bg-noise opacity-[0.035] mix-blend-overlay dark:opacity-[0.06]" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background" />
       </div>
-    </div>
+
+      <motion.div
+        style={{ y: textY, opacity: fade }}
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="mx-auto w-full max-w-6xl px-6 pt-28 lg:pt-24"
+      >
+        <div className="max-w-xl">
+        <motion.div variants={item}>
+          <span className="gradient-ring glass inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-sm text-foreground/90 shadow-[0_8px_24px_-12px_color-mix(in_oklch,var(--brand)_60%,transparent)]">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand/70" />
+              <span className="relative inline-flex size-2 rounded-full bg-brand" />
+            </span>
+            {siteConfig.status}
+          </span>
+        </motion.div>
+
+        <motion.h1
+          variants={item}
+          className="mt-7 text-balance text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl"
+        >
+          <span className="text-gradient">I&apos;m </span>
+          <span className="text-shimmer">{siteConfig.name}</span>
+        </motion.h1>
+
+        <motion.p
+          variants={item}
+          className="mt-5 flex items-center gap-3 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground"
+        >
+          {siteConfig.role}
+          <span className="h-px w-16 bg-gradient-to-r from-brand/70 to-transparent" />
+        </motion.p>
+
+        <motion.p
+          variants={item}
+          className="mt-6 text-lg leading-relaxed text-muted-foreground"
+        >
+          {siteConfig.description}
+        </motion.p>
+
+        <motion.div
+          variants={item}
+          className="mt-10 flex flex-wrap items-center gap-3"
+        >
+          <Link
+            href="/blog"
+            className="cta-gradient group inline-flex h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            Read the blog
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </Link>
+          <Link
+            href="/about"
+            className="gradient-ring glass inline-flex h-12 items-center rounded-full px-6 text-sm font-semibold text-foreground outline-none transition-colors hover:bg-[color-mix(in_oklch,var(--brand)_10%,transparent)] focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            More about me
+          </Link>
+        </motion.div>
+
+        <motion.div
+          variants={item}
+          className="mt-12 flex items-center gap-2 text-muted-foreground"
+        >
+          {[
+            { href: siteConfig.social.github, label: "GitHub", Icon: GitHubIcon },
+            { href: siteConfig.social.twitter, label: "X (Twitter)", Icon: XIcon },
+            { href: `mailto:${siteConfig.social.email}`, label: "Email", Icon: Mail },
+          ].map(({ href, label, Icon }) => (
+            <a
+              key={label}
+              href={href}
+              target={href.startsWith("mailto:") ? undefined : "_blank"}
+              rel="noreferrer noopener"
+              aria-label={label}
+              className="gradient-ring flex size-10 items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand/10 hover:text-primary"
+            >
+              <Icon className="size-[18px]" />
+            </a>
+          ))}
+        </motion.div>
+        </div>
+      </motion.div>
+    </section>
   );
 }

@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import Image from "next/image";
 
 import { siteConfig } from "@/lib/site";
 
@@ -34,9 +34,15 @@ export function Polaroid() {
 
       {/* Front polaroid */}
       <div className="relative -rotate-2 rounded-sm bg-neutral-950 p-3 pb-10 shadow-2xl shadow-black/50 ring-1 ring-white/5">
-        <div className="relative flex h-72 w-60 items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-900/40 via-neutral-800 to-neutral-900">
-          <div className="absolute inset-0 bg-grid opacity-20" />
-          <User className="size-20 text-white/20" />
+        <div className="relative h-72 w-60 overflow-hidden bg-neutral-900">
+          <Image
+            src="/profile.jpg"
+            alt={siteConfig.author}
+            fill
+            sizes="240px"
+            priority
+            className="object-cover"
+          />
         </div>
         <p className="absolute bottom-2 left-0 right-0 text-center font-serif text-xl italic text-white/80">
           {siteConfig.author}

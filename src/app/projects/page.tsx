@@ -46,7 +46,7 @@ export default function ProjectsPage() {
       </header>
 
       {/* Project list */}
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 px-6 md:grid-cols-2">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6">
         {projects.map((project, i) => (
           <ProjectPair key={project.title} project={project} index={i} />
         ))}

@@ -23,7 +23,7 @@ export function ProjectImageCard({
     >
       <div className={cn("absolute inset-0 bg-gradient-to-br", accent)} />
       <div className="absolute inset-0 bg-grid opacity-30" />
-      <span className="pointer-events-none select-none whitespace-nowrap text-6xl font-bold text-foreground/[0.06]">
+      <span className="pointer-events-none select-none whitespace-nowrap text-4xl font-bold text-foreground/[0.06] sm:text-6xl">
         {title}
       </span>
     </div>
@@ -91,25 +91,21 @@ export function ProjectPair({
   project: Project;
   index: number;
 }) {
+  // Text always comes first on mobile; the pair alternates only once there are two columns.
+  // min-w-0 keeps the image card's oversized watermark from forcing the column wider than the viewport.
   const reversed = index % 2 === 1;
-  const text = (
-    <Reveal>
-      <ProjectTextCard project={project} />
-    </Reveal>
-  );
-  const image = (
-    <Reveal delay={0.08}>
-      <ProjectImageCard
-        title={project.title}
-        accent={project.accent}
-        className="h-full"
-      />
-    </Reveal>
-  );
   return (
-    <>
-      {reversed ? image : text}
-      {reversed ? text : image}
-    </>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Reveal className={cn("min-w-0", reversed && "md:order-2")}>
+        <ProjectTextCard project={project} />
+      </Reveal>
+      <Reveal delay={0.08} className={cn("min-w-0", reversed && "md:order-1")}>
+        <ProjectImageCard
+          title={project.title}
+          accent={project.accent}
+          className="h-full"
+        />
+      </Reveal>
+    </div>
   );
 }

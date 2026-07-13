@@ -4,7 +4,11 @@
       "Bash(pnpm --version)",
       "Bash(pnpm create *)",
       "Bash(pnpm rebuild *)",
-      "Bash(pnpm dlx *)"
+      "Bash(pnpm dlx *)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)"
     ]
   }
 }

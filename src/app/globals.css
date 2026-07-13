@@ -205,6 +205,144 @@
   color: transparent;
 }
 
+/* ---- Hero gradient system ---- */
+
+/* Headline: foreground → brand sweep that slowly travels across the text */
+.text-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--foreground) 0%,
+    var(--foreground) 28%,
+    var(--brand) 42%,
+    var(--chart-2) 52%,
+    var(--foreground) 68%,
+    var(--foreground) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-sweep 7s ease-in-out infinite;
+}
+@keyframes shimmer-sweep {
+  0%,
+  10% {
+    background-position: 120% 0;
+  }
+  60%,
+  100% {
+    background-position: -60% 0;
+  }
+}
+
+/* 1px gradient border that survives rounded corners (mask-composite trick) */
+.gradient-ring {
+  position: relative;
+}
+.gradient-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    color-mix(in oklch, var(--brand) 60%, transparent),
+    color-mix(in oklch, var(--foreground) 12%, transparent) 45%,
+    color-mix(in oklch, var(--chart-2) 45%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Frosted surface used for the pill, tiles and secondary CTA */
+.glass {
+  background: color-mix(in oklch, var(--card) 55%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Gradient CTA with a colored bloom underneath */
+.cta-gradient {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--brand) 92%, white) 0%,
+    var(--brand) 45%,
+    var(--chart-2) 100%
+  );
+  box-shadow:
+    0 1px 0 0 color-mix(in oklch, white 35%, transparent) inset,
+    0 10px 30px -10px color-mix(in oklch, var(--brand) 70%, transparent),
+    0 2px 8px -2px color-mix(in oklch, var(--brand) 40%, transparent);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease,
+    filter 0.3s ease;
+}
+.cta-gradient:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklch, white 45%, transparent) inset,
+    0 16px 44px -12px color-mix(in oklch, var(--brand) 85%, transparent),
+    0 3px 10px -2px color-mix(in oklch, var(--brand) 50%, transparent);
+}
+
+/* Slowly drifting aurora blobs behind the hero */
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate3d(-4%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(8%, -6%, 0) scale(1.18);
+  }
+}
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate3d(6%, 4%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-6%, -4%, 0) scale(0.92);
+  }
+}
+@keyframes aurora-c {
+  0%,
+  100% {
+    transform: translate3d(0, 6%, 0) scale(0.95);
+  }
+  50% {
+    transform: translate3d(-8%, -2%, 0) scale(1.2);
+  }
+}
+.aurora-a {
+  animation: aurora-a 20s ease-in-out infinite;
+}
+.aurora-b {
+  animation: aurora-b 26s ease-in-out infinite;
+}
+.aurora-c {
+  animation: aurora-c 32s ease-in-out infinite;
+}
+
+/* Film-grain overlay so the large gradients don't band */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer,
+  .aurora-a,
+  .aurora-b,
+  .aurora-c {
+    animation: none;
+  }
+}
+
 /* Smooth-scroll: let Lenis drive scrolling */
 html.lenis,
 html.lenis body {
