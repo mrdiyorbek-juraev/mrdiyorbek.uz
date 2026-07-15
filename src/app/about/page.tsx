@@ -8,7 +8,7 @@ import { TechStack } from "@/components/about/tech-stack";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `A story of growth and discovery — about ${siteConfig.author}`
+  description: `A story of growth and discovery — about ${siteConfig.author}..`
 };
 
 const nowItems = [
