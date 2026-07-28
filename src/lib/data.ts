@@ -34,41 +34,22 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    title: "Dimension AI",
+    title: "OctaneJS",
     description:
-      "AI coworker that connects to tools like email, calendar, Slack, docs, and project systems to help teams reduce busywork.",
-    tools: ["Next.js", "Tailwind", "TypeScript"],
-    href: "/projects",
-    live: "https://example.com",
-    accent: "from-indigo-500/25 via-sky-600/10 to-transparent",
+      "A compile-time UI framework that keeps React's programming model and drops the virtual DOM. I'm on the core team, working across the runtime, SSR, hydration, and profiling.",
+    tools: ["TypeScript", "Compilers", "SSR"],
+    href: "https://octanejs.dev",
+    repo: "https://github.com/octanejs/octane",
+    accent: "from-sky-500/25 via-indigo-600/10 to-transparent",
   },
   {
-    title: "Hexcape",
+    title: "Typix",
     description:
-      "A game that combines iOS and a physical puzzle game, using 3D, 360 world view, and AR.",
-    tools: ["Swift", "SceneKit", "ARKit"],
-    href: "/projects",
-    live: "https://example.com",
+      "An extensible, headless rich-text editor built on Lexical — 25+ extensions, a CLI, and a plugin architecture, shipping as a platform's core editing experience.",
+    tools: ["React", "TypeScript", "Lexical"],
+    href: "https://www.typix.uz",
+    repo: "https://github.com/mrdiyorbek-juraev/typix",
     accent: "from-emerald-500/25 via-teal-600/10 to-transparent",
-  },
-  {
-    title: "Notiolink",
-    description:
-      "Self-hostable branded link shortener built with Next.js & Notion API.",
-    tools: ["Next.js", "Tailwind", "Notion API"],
-    href: "/projects",
-    live: "https://example.com",
-    repo: "https://github.com/",
-    accent: "from-amber-500/25 via-orange-600/10 to-transparent",
-  },
-  {
-    title: "Overkill",
-    description:
-      "A tiny, type-safe state manager for React with zero boilerplate and devtools support.",
-    tools: ["TypeScript", "React", "Vite"],
-    href: "/projects",
-    repo: "https://github.com/",
-    accent: "from-fuchsia-500/25 via-purple-600/10 to-transparent",
   },
 ];
 

@@ -75,15 +75,23 @@ export function MoreLink({
   href: string;
   children: React.ReactNode;
 }) {
+  // Project links now point off-site, so route those through a plain anchor —
+  // next/link would keep them in the same tab and can't prefetch them anyway.
+  const external = /^https?:\/\//.test(href);
+  const Tag = external ? "a" : Link;
+
   return (
-    <Link
+    <Tag
       href={href}
+      {...(external
+        ? { target: "_blank", rel: "noreferrer noopener" as const }
+        : {})}
       className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
     >
       {children}
       <span className="flex size-5 items-center justify-center rounded-full border border-border/70 bg-secondary/60 transition-colors group-hover:border-brand/50 group-hover:text-primary">
         <ChevronRight className="size-3.5" />
       </span>
-    </Link>
+    </Tag>
   );
 }
