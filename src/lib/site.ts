@@ -5,7 +5,8 @@ export const siteConfig = {
   // renders its own linked version of the same sentence.
   description:
     "Software engineer on the OctaneJS core team, a compiled framework that keeps React's programming model and drops the virtual DOM. Author of Typix, a headless rich-text editor framework for React.",
-  url: "https://example.com",
+  // metadataBase — every canonical and OG URL resolves against this.
+  url: "https://mrdiyorbek.uz",
   author: "Diyorbek",
   role: "Software Engineer · OctaneJS Core Team",
   status: "Currently open for remote opportunities",
@@ -59,9 +60,10 @@ export const siteConfig = {
     },
   ],
   social: {
-    github: "https://github.com/",
+    github: "https://github.com/mrdiyorbek-juraev",
+    // TODO: still a placeholder — no handle on the CV to fill this in with.
     twitter: "https://twitter.com/",
-    email: "muzaffarbeksat@gmail.com",
+    email: "mrdiyorbekjuraev@gmail.com",
   },
 } as const;
 
