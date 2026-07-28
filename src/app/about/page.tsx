@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { UserRound, Sparkle } from "lucide-react";
+import { UserRound } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
 import { Reveal } from "@/components/reveal";
@@ -8,31 +8,28 @@ import { TechStack } from "@/components/about/tech-stack";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `A story of growth and discovery — about ${siteConfig.author}..`
+  description: `Frontend engineer, OctaneJS core team, author of Typix — about ${siteConfig.author}.`,
 };
 
-const nowItems = [
-  {
-    emoji: "✈️",
-    text: "I regularly solo travel, usually for 2 weeks at a time.",
-    highlight: "7 times so far",
-  },
-  {
-    emoji: "🪂",
-    text: "I'm a licensed skydiver and a scuba diver.",
-    highlight: "85 jumps so far",
-  },
-  {
-    emoji: "📚",
-    text: "Reading more long-form and writing notes in public.",
-    highlight: "12 books this year",
-  },
-  {
-    emoji: "🛠️",
-    text: "Building small tools and open-source side projects.",
-    highlight: "on most weekends",
-  },
-];
+// Named to avoid reading as next/link, which this deliberately is not.
+function ExternalLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="font-medium text-foreground underline decoration-brand/50 underline-offset-4 transition-colors hover:decoration-brand"
+    >
+      {children}
+    </a>
+  );
+}
 
 export default function AboutPage() {
   return (
@@ -77,60 +74,36 @@ export default function AboutPage() {
               <strong className="font-semibold text-foreground">
                 {siteConfig.author}
               </strong>
-              . I&apos;m a software engineer who works with the React ecosystem
-              and writes to teach people how to rebuild and redefine fundamental
-              concepts through mental models.
+              .
             </p>
             <p>
-              When I first got into web development, I learned front-end out of
-              curiosity — and never really stopped. What started as tinkering
-              slowly turned into the thing I care about most.
+              I&apos;m a software engineer currently building AI-powered
+              products at Nordra. My work focuses on frontend architecture,
+              design systems, performance, and developer experience.
             </p>
             <p>
-              As part of my learning journey, I started writing articles as a way
-              to solidify my knowledge. When I posted them here as documentation,
-              I discovered that many people found them valuable. Hopefully, it can
-              help you too.
+              Outside of work, I&apos;m a core contributor to{" "}
+              <ExternalLink href={siteConfig.work.octane.href}>
+                OctaneJS
+              </ExternalLink>
+              , where I work on the runtime, SSR, hydration, and profiling. I
+              also maintain{" "}
+              <ExternalLink href={siteConfig.work.typix.href}>
+                Typix
+              </ExternalLink>
+              , an open-source headless rich-text editor built on Lexical.
             </p>
             <p>
-              I&apos;m also a full-stack engineer — here are my current favorite
-              tools:
+              I started writing these posts to better understand the
+              technologies I use every day. Over time, they turned into notes
+              that others found useful as well. Hopefully you&apos;ll find
+              something valuable here too.
             </p>
+            <p>Tools I reach for most:</p>
           </div>
 
           <div className="mt-5">
             <TechStack />
-          </div>
-        </Reveal>
-      </section>
-
-      {/* What I'm up to now */}
-      <section className="mx-auto mt-20 w-full max-w-5xl px-6">
-        <Reveal>
-          <div className="grid gap-8 rounded-3xl border border-border/60 bg-card/40 p-8 md:grid-cols-[16rem_1fr]">
-            <div className="flex items-start gap-3">
-              <span className="flex size-10 items-center justify-center rounded-xl border border-border/60 bg-secondary/50 text-primary">
-                <Sparkle className="size-5" />
-              </span>
-              <h2 className="pt-1.5 text-xl font-semibold tracking-tight">
-                What I&apos;m up to now
-              </h2>
-            </div>
-
-            <ul className="space-y-4">
-              {nowItems.map((item) => (
-                <li key={item.text} className="flex gap-3 text-muted-foreground">
-                  <span aria-hidden>{item.emoji}</span>
-                  <span>
-                    {item.text}{" "}
-                    <span className="font-medium text-foreground underline decoration-brand/50 underline-offset-4">
-                      {item.highlight}
-                    </span>
-                    .
-                  </span>
-                </li>
-              ))}
-            </ul>
           </div>
         </Reveal>
       </section>
