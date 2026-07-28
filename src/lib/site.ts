@@ -1,12 +1,18 @@
 export const siteConfig = {
   name: "Diyorbek",
-  title: "Diyorbek — Developer & Writer",
+  title: "Diyorbek — Software Engineer & Writer",
+  // Plain text on purpose: this is the SEO/OpenGraph description. The hero
+  // renders its own linked version of the same sentence.
   description:
-    "I work with the React ecosystem, and write to teach people how to rebuild and redefine fundamental concepts through mental models.",
+    "Software engineer on the OctaneJS core team, a compiled framework that keeps React's programming model and drops the virtual DOM. Author of Typix, a headless rich-text editor framework for React.",
   url: "https://example.com",
   author: "Diyorbek",
-  role: "Design Engineer",
+  role: "Software Engineer · OctaneJS Core Team",
   status: "Currently open for remote opportunities",
+  work: {
+    octane: { name: "OctaneJS", href: "https://octanejs.dev" },
+    typix: { name: "Typix", href: "https://www.typix.uz" },
+  },
   nav: [
     { title: "Home", href: "/" },
     { title: "Blog", href: "/blog" },

@@ -207,14 +207,14 @@
 
 /* ---- Hero gradient system ---- */
 
-/* Headline: foreground → brand sweep that slowly travels across the text */
+/* Headline: monochrome light sweep that slowly travels across the text */
 .text-shimmer {
   background: linear-gradient(
     100deg,
     var(--foreground) 0%,
     var(--foreground) 28%,
-    var(--brand) 42%,
-    var(--chart-2) 52%,
+    color-mix(in oklch, var(--foreground) 45%, var(--background)) 45%,
+    color-mix(in oklch, var(--foreground) 60%, var(--background)) 55%,
     var(--foreground) 68%,
     var(--foreground) 100%
   );
@@ -248,9 +248,9 @@
   padding: 1px;
   background: linear-gradient(
     140deg,
-    color-mix(in oklch, var(--brand) 60%, transparent),
-    color-mix(in oklch, var(--foreground) 12%, transparent) 45%,
-    color-mix(in oklch, var(--chart-2) 45%, transparent)
+    color-mix(in oklch, var(--foreground) 28%, transparent),
+    color-mix(in oklch, var(--foreground) 10%, transparent) 45%,
+    color-mix(in oklch, var(--foreground) 22%, transparent)
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -266,29 +266,29 @@
   backdrop-filter: blur(12px) saturate(140%);
 }
 
-/* Gradient CTA with a colored bloom underneath */
+/* Neutral CTA with a soft shadow underneath */
 .cta-gradient {
   background: linear-gradient(
     135deg,
-    color-mix(in oklch, var(--brand) 92%, white) 0%,
-    var(--brand) 45%,
-    var(--chart-2) 100%
+    color-mix(in oklch, var(--foreground) 88%, var(--background)) 0%,
+    var(--foreground) 55%,
+    color-mix(in oklch, var(--foreground) 92%, var(--background)) 100%
   );
   box-shadow:
-    0 1px 0 0 color-mix(in oklch, white 35%, transparent) inset,
-    0 10px 30px -10px color-mix(in oklch, var(--brand) 70%, transparent),
-    0 2px 8px -2px color-mix(in oklch, var(--brand) 40%, transparent);
+    0 1px 0 0 color-mix(in oklch, var(--background) 25%, transparent) inset,
+    0 10px 30px -10px color-mix(in oklch, var(--foreground) 40%, transparent),
+    0 2px 8px -2px color-mix(in oklch, var(--foreground) 22%, transparent);
   transition:
     box-shadow 0.3s ease,
     transform 0.3s ease,
     filter 0.3s ease;
 }
 .cta-gradient:hover {
-  filter: brightness(1.06);
+  filter: brightness(1.12);
   box-shadow:
-    0 1px 0 0 color-mix(in oklch, white 45%, transparent) inset,
-    0 16px 44px -12px color-mix(in oklch, var(--brand) 85%, transparent),
-    0 3px 10px -2px color-mix(in oklch, var(--brand) 50%, transparent);
+    0 1px 0 0 color-mix(in oklch, var(--background) 35%, transparent) inset,
+    0 16px 44px -12px color-mix(in oklch, var(--foreground) 50%, transparent),
+    0 3px 10px -2px color-mix(in oklch, var(--foreground) 28%, transparent);
 }
 
 /* Slowly drifting aurora blobs behind the hero */
