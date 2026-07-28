@@ -13,13 +13,15 @@ export type PostMeta = {
   tags: string[];
   published: boolean;
   readingTime: string;
-  views: number;
   image?: string;
 };
 
 export type Post = PostMeta & {
   content: string;
 };
+
+/** A post joined with its live counters, as list pages render it. */
+export type PostWithStats = PostMeta & { views: number; likes: number };
 
 function readPostFile(slug: string): Post | null {
   const fullPath = path.join(BLOG_DIR, `${slug}.mdx`);
@@ -36,7 +38,6 @@ function readPostFile(slug: string): Post | null {
     tags: Array.isArray(data.tags) ? data.tags : [],
     published: data.published ?? true,
     readingTime: readingTime(content).text,
-    views: typeof data.views === "number" ? data.views : 0,
     image: data.image,
     content,
   };

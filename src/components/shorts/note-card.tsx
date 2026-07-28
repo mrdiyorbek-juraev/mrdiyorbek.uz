@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
-import type { Note } from "@/lib/shorts";
-import { formatNumber } from "@/lib/utils";
+import type { NoteWithStats } from "@/lib/shorts";
+import { StatBar } from "@/components/content/stat-bar";
 
-export function NoteCard({ note }: { note: Note }) {
+export function NoteCard({ note }: { note: NoteWithStats }) {
   return (
     <Link
       href={`/shorts/${note.slug}`}
@@ -17,10 +16,11 @@ export function NoteCard({ note }: { note: Note }) {
         <h3 className="text-lg font-semibold leading-snug tracking-tight text-muted-foreground transition-colors group-hover:text-foreground group-hover:underline group-hover:decoration-foreground/40 group-hover:underline-offset-4">
           {note.title}
         </h3>
-        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Eye className="size-4 text-primary" />
-          {formatNumber(note.views)} views
-        </span>
+        <StatBar
+          readingTime={note.readingTime}
+          views={note.views}
+          likes={note.likes}
+        />
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2 border-t border-border/50 pt-4">

@@ -4,7 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, Newspaper, CalendarDays, Check, ChevronsUpDown } from "lucide-react";
 
-import type { PostMeta } from "@/lib/blog";
+import type { PostWithStats } from "@/lib/blog";
 import { cn } from "@/lib/utils";
 import { PostRow } from "@/components/post-row";
 import { Input } from "@/components/ui/input";
@@ -16,15 +16,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortKey = "date-desc" | "date-asc" | "views";
+type SortKey = "date-desc" | "date-asc" | "views" | "likes";
 
 const sortLabels: Record<SortKey, string> = {
   "date-desc": "Sort by date",
   "date-asc": "Oldest first",
   views: "Most viewed",
+  likes: "Most liked",
 };
 
-export function BlogExplorer({ posts }: { posts: PostMeta[] }) {
+export function BlogExplorer({ posts }: { posts: PostWithStats[] }) {
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState<string[]>([]);
   const [sort, setSort] = React.useState<SortKey>("date-desc");
@@ -59,6 +60,7 @@ export function BlogExplorer({ posts }: { posts: PostMeta[] }) {
     });
     result.sort((a, b) => {
       if (sort === "views") return b.views - a.views;
+      if (sort === "likes") return b.likes - a.likes;
       const diff = +new Date(a.date) - +new Date(b.date);
       return sort === "date-asc" ? diff : -diff;
     });

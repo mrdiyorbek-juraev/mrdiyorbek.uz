@@ -1,9 +1,9 @@
-import type { PostMeta } from "@/lib/blog";
+import type { PostWithStats } from "@/lib/blog";
 import { Reveal } from "@/components/reveal";
 import { PostRow } from "@/components/post-row";
 import { SectionHeading, MoreLink } from "@/components/section-heading";
 
-export function FeaturedPosts({ posts }: { posts: PostMeta[] }) {
+export function FeaturedPosts({ posts }: { posts: PostWithStats[] }) {
   if (posts.length === 0) return null;
 
   return (

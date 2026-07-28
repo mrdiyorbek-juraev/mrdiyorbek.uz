@@ -9,6 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Mdx } from "@/components/mdx";
 import { PageShell } from "@/components/page-shell";
+import {
+  ArticleStats,
+  EngagementProvider,
+  LikeButton,
+} from "@/components/content/engagement";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -43,40 +48,47 @@ export default async function PostPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <PageShell className="space-y-8">
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" /> Back to blog
-      </Link>
+    // The page stays statically generated; only the counters inside this
+    // provider are live.
+    <EngagementProvider kind="blog" slug={post.slug}>
+      <PageShell className="space-y-8">
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" /> Back to blog
+        </Link>
 
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <time dateTime={post.date}>{formatDate(post.date)}</time>
-          <span aria-hidden>·</span>
-          <span>{post.readingTime}</span>
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          {post.title}
-        </h1>
-        {post.description && (
-          <p className="text-lg text-muted-foreground">{post.description}</p>
-        )}
-        {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {post.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
+        <header className="space-y-3">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+            <time dateTime={post.date}>{formatDate(post.date)}</time>
+            <ArticleStats readingTime={post.readingTime} />
           </div>
-        )}
-      </header>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {post.title}
+          </h1>
+          {post.description && (
+            <p className="text-lg text-muted-foreground">{post.description}</p>
+          )}
+          {post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {post.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </header>
 
-      <Separator />
+        <Separator />
 
-      <Mdx source={post.content} />
-    </PageShell>
+        <Mdx source={post.content} />
+
+        <Separator />
+
+        <LikeButton className="py-4" />
+      </PageShell>
+    </EngagementProvider>
   );
 }

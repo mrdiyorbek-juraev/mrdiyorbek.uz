@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Clock, Eye } from "lucide-react";
 
-import type { PostMeta } from "@/lib/blog";
-import { cn, formatDate, formatNumber, thumbGradient } from "@/lib/utils";
+import type { PostWithStats } from "@/lib/blog";
+import { cn, formatDate, thumbGradient } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { StatBar } from "@/components/content/stat-bar";
 
-export function PostRow({ post }: { post: PostMeta }) {
+export function PostRow({ post }: { post: PostWithStats }) {
   return (
     <article className="border-b border-dashed border-border/60 py-8 last:border-b-0">
       <Link
@@ -24,15 +24,12 @@ export function PostRow({ post }: { post: PostMeta }) {
           </h3>
           <p className="text-muted-foreground">{post.description}</p>
 
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Clock className="size-4 text-primary" />
-              {post.readingTime}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Eye className="size-4 text-primary" />
-              {formatNumber(post.views)} views
-            </span>
+          <StatBar
+            readingTime={post.readingTime}
+            views={post.views}
+            likes={post.likes}
+            className="pt-1"
+          >
             {post.tags.length > 0 && (
               <span className="flex flex-wrap gap-2">
                 {post.tags.map((tag) => (
@@ -42,7 +39,7 @@ export function PostRow({ post }: { post: PostMeta }) {
                 ))}
               </span>
             )}
-          </div>
+          </StatBar>
         </div>
 
         <div

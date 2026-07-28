@@ -4,7 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, StickyNote, ArrowDownUp, ChevronsUpDown, Check } from "lucide-react";
 
-import type { Note } from "@/lib/shorts";
+import type { NoteWithStats } from "@/lib/shorts";
 import { cn } from "@/lib/utils";
 import { NoteCard } from "@/components/shorts/note-card";
 import { Input } from "@/components/ui/input";
@@ -16,15 +16,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortKey = "az" | "za" | "views";
+type SortKey = "az" | "za" | "views" | "likes";
 
 const sortLabels: Record<SortKey, string> = {
   az: "Sort A to Z",
   za: "Sort Z to A",
   views: "Most viewed",
+  likes: "Most liked",
 };
 
-export function ShortsExplorer({ notes }: { notes: Note[] }) {
+export function ShortsExplorer({ notes }: { notes: NoteWithStats[] }) {
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState<string[]>([]);
   const [sort, setSort] = React.useState<SortKey>("az");
@@ -57,6 +58,7 @@ export function ShortsExplorer({ notes }: { notes: Note[] }) {
     });
     result.sort((a, b) => {
       if (sort === "views") return b.views - a.views;
+      if (sort === "likes") return b.likes - a.likes;
       const cmp = a.title.localeCompare(b.title);
       return sort === "za" ? -cmp : cmp;
     });

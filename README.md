@@ -20,6 +20,39 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Engagement backend (views & likes)
+
+Views and likes live in Supabase Postgres behind an [ElysiaJS](https://elysiajs.com)
+API mounted inside Next at `src/app/api/[[...slugs]]/route.ts`. Read time is not
+part of this — it is derived from the MDX at build time by `reading-time`.
+
+### Setup
+
+1. Copy `.env.example` to `.env.local` and fill in the three values (the
+   service-role key comes from Supabase → Settings → API Keys).
+2. Run `supabase/migrations/0001_engagement.sql` in the Supabase SQL editor.
+
+### How it works
+
+| Layer | File | Notes |
+| --- | --- | --- |
+| Schema | `supabase/migrations/0001_engagement.sql` | Two ledgers + a counter cache. RLS on, zero policies — reachable only via the service role. |
+| Service | `src/server/stats.ts` | Reads fail soft to zeros; mutations throw. |
+| API | `src/server/api.ts` | Elysia, TypeBox-validated, slugs checked against real content. |
+| Client | `src/lib/api.ts`, `src/hooks/use-content-stats.ts` | Eden Treaty, optimistic + debounced likes. |
+
+Views are deduped per visitor per 24h and likes are capped at 5 per visitor per
+post — both enforced by database constraints rather than application code, so
+there is no separate rate limiter to keep in sync. Visitors are identified by a
+salted hash of IP + user-agent; **no raw IP is ever stored**.
+
+List pages (`/`, `/blog`, `/shorts`) call `getStatsMap()` directly in the server
+component under `revalidate = 300` — a statically generated page has no server
+of its own to fetch from at build time. Only the browser talks to Elysia.
+
+If the counters ever drift, `select reconcile_stats();` rebuilds them from the
+ledgers, which are the source of truth.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
