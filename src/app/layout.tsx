@@ -36,6 +36,12 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+  // Search Console's HTML-tag verification. Set GOOGLE_SITE_VERIFICATION in
+  // Vercel and redeploy — Next omits the tag entirely when it's unset, so
+  // there's nothing to clean up if you verify by DNS instead.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   openGraph: {
     type: "website",
     title: siteConfig.title,
