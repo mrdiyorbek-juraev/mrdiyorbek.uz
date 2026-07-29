@@ -6,6 +6,7 @@ import { Reveal } from "@/components/reveal";
 import { ProjectPair } from "@/components/project-cards";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/projects" },
   title: "Projects",
   description: "Showcase of my projects that I'm proud of.",
 };

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { PlaceholderPage } from "@/components/placeholder-page";
 
-export const metadata: Metadata = { title: "Bucket List" };
+// Empty placeholder for now — kept out of the index until it has content.
+export const metadata: Metadata = {
+  title: "Bucket List",
+  robots: { index: false, follow: true },
+};
 
 export default function BucketListPage() {
   return (

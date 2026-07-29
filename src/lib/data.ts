@@ -80,7 +80,7 @@ export const footerColumns = [
     links: [
       { title: "Book Notes", href: "/blog" },
       { title: "Starter Templates", href: "/projects" },
-      { title: "RSS", href: "/blog" },
+      { title: "RSS", href: "/rss.xml" },
       { title: "Mentorship", href: "/about" },
       { title: "Analytics", href: "/stats" },
     ],

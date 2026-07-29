@@ -5,6 +5,7 @@ import { getStatsMap, withStats } from "@/server/stats";
 import { BlogExplorer } from "@/components/blog/blog-explorer";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog",
   description:
     "Thoughts, mental models, and tutorials about front-end development.",

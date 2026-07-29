@@ -8,6 +8,8 @@ export const siteConfig = {
   // metadataBase — every canonical and OG URL resolves against this.
   url: "https://mrdiyorbek.uz",
   author: "Diyorbek",
+  /** Legal name, for structured data and social cards — what people search. */
+  fullName: "Diyorbek Juraev",
   role: "Software Engineer · OctaneJS Core Team",
   status: "Currently open for remote opportunities",
   work: {

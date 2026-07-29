@@ -26,7 +26,16 @@ export const metadata: Metadata = {
     template: `%s — ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  authors: [{ name: siteConfig.author }],
+  authors: [{ name: siteConfig.author, url: siteConfig.url }],
+  creator: siteConfig.author,
+  // No `alternates.canonical` here on purpose: layout metadata is inherited,
+  // so a canonical set at the root makes every child page claim to be a
+  // duplicate of the homepage. Each page declares its own.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
   openGraph: {
     type: "website",
     title: siteConfig.title,
@@ -41,6 +50,51 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Person + WebSite graph. This is what lets Google build a knowledge panel for
+ * a name and tie the profile links together as the same identity.
+ */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${siteConfig.url}/#person`,
+      name: siteConfig.fullName,
+      alternateName: siteConfig.name,
+      url: siteConfig.url,
+      email: `mailto:${siteConfig.social.email}`,
+      jobTitle: "Software Engineer",
+      description: siteConfig.description,
+      sameAs: [
+        siteConfig.social.github,
+        siteConfig.social.linkedin,
+        siteConfig.social.twitter,
+        siteConfig.social.telegram,
+      ],
+      knowsAbout: [
+        "OctaneJS",
+        "Typix",
+        "React",
+        "TypeScript",
+        "Next.js",
+        "Lexical",
+        "Design systems",
+        "Web performance",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteConfig.url}/#website`,
+      url: siteConfig.url,
+      name: siteConfig.title,
+      description: siteConfig.description,
+      inLanguage: "en",
+      publisher: { "@id": `${siteConfig.url}/#person` },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,6 +107,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script
+          type="application/ld+json"
+          // Built from siteConfig, not user input.
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

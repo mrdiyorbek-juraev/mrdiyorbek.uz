@@ -5,6 +5,7 @@ import { getStatsMap, withStats } from "@/server/stats";
 import { ShortsExplorer } from "@/components/shorts/shorts-explorer";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/shorts" },
   title: "Shorts",
   description: "My personal notes that's not long enough to be a blog post.",
 };

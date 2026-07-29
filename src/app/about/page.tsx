@@ -7,6 +7,7 @@ import { Polaroid } from "@/components/about/polaroid";
 import { TechStack } from "@/components/about/tech-stack";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About",
   description: `Frontend engineer, OctaneJS core team, author of Typix — about ${siteConfig.author}.`,
 };

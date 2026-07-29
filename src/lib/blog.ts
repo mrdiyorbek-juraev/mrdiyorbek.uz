@@ -13,6 +13,8 @@ export type PostMeta = {
   tags: string[];
   published: boolean;
   readingTime: string;
+  /** BCP-47 tag for the post body. Drives <article lang> and og:locale. */
+  lang: string;
   image?: string;
 };
 
@@ -38,6 +40,7 @@ function readPostFile(slug: string): Post | null {
     tags: Array.isArray(data.tags) ? data.tags : [],
     published: data.published ?? true,
     readingTime: readingTime(content).text,
+    lang: typeof data.lang === "string" ? data.lang : "en",
     image: data.image,
     content,
   };
