@@ -9,7 +9,7 @@ export function FeaturedPosts({ posts }: { posts: PostWithStats[] }) {
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-24">
       <Reveal>
-        <SectionHeading lead="Featured" highlight="Posts" arrow className="mb-6" />
+        <SectionHeading lead="Featured" highlight="Posts" className="mb-6" />
       </Reveal>
 
       <div>

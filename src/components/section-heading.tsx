@@ -8,7 +8,6 @@ export function SectionHeading({
   lead,
   highlight,
   underline = false,
-  arrow = false,
   subtitle,
   className,
 }: {
@@ -16,7 +15,6 @@ export function SectionHeading({
   lead: string;
   highlight?: string;
   underline?: boolean;
-  arrow?: boolean;
   subtitle?: string;
   className?: string;
 }) {
@@ -27,7 +25,7 @@ export function SectionHeading({
           {overline}
         </p>
       )}
-      <h2 className="relative inline-flex flex-wrap items-end gap-x-3 text-4xl font-bold tracking-tight sm:text-5xl">
+      <h2 className="inline-flex flex-wrap items-end gap-x-3 text-4xl font-bold tracking-tight sm:text-5xl">
         <span>{lead}</span>
         {highlight && (
           <span
@@ -38,29 +36,6 @@ export function SectionHeading({
           >
             {highlight}
           </span>
-        )}
-        {arrow && (
-          <svg
-            aria-hidden
-            viewBox="0 0 120 70"
-            className="pointer-events-none absolute -right-24 top-6 hidden h-16 w-28 text-muted-foreground/70 sm:block"
-            fill="none"
-          >
-            <path
-              d="M2 4C40 6 96 8 104 40"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeDasharray="4 6"
-            />
-            <path
-              d="M104 40l-9-8M104 40l4-11"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
         )}
       </h2>
       {subtitle && <p className="max-w-2xl text-muted-foreground">{subtitle}</p>}

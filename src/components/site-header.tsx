@@ -68,31 +68,36 @@ export function SiteHeader() {
             </Link>
           ))}
 
-          <span className="mx-1 h-5 w-px bg-border/70" aria-hidden />
+          {/* Divider travels with the button so hiding it leaves one, not two. */}
+          {siteConfig.showMoreMenu && (
+            <>
+              <span className="mx-1 h-5 w-px bg-border/70" aria-hidden />
 
-          <div
-            className="relative"
-            onMouseEnter={openMore}
-            onMouseLeave={scheduleClose}
-          >
-            <button
-              type="button"
-              onClick={() => setMoreOpen((v) => !v)}
-              aria-expanded={moreOpen}
-              className={cn(
-                "flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-                moreOpen && "text-foreground",
-              )}
-            >
-              More
-              <ChevronDown
-                className={cn(
-                  "size-4 transition-transform duration-200",
-                  moreOpen && "rotate-180",
-                )}
-              />
-            </button>
-          </div>
+              <div
+                className="relative"
+                onMouseEnter={openMore}
+                onMouseLeave={scheduleClose}
+              >
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen((v) => !v)}
+                  aria-expanded={moreOpen}
+                  className={cn(
+                    "flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+                    moreOpen && "text-foreground",
+                  )}
+                >
+                  More
+                  <ChevronDown
+                    className={cn(
+                      "size-4 transition-transform duration-200",
+                      moreOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+              </div>
+            </>
+          )}
 
           <span className="mx-1 h-5 w-px bg-border/70" aria-hidden />
           <ModeToggle />
@@ -100,7 +105,7 @@ export function SiteHeader() {
 
         {/* Mega menu */}
         <AnimatePresence>
-          {moreOpen && (
+          {siteConfig.showMoreMenu && moreOpen && (
             <motion.div
               initial={{ opacity: 0, y: 8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -196,18 +201,22 @@ export function SiteHeader() {
                     {item.title}
                   </Link>
                 ))}
-                <div className="my-2 h-px bg-border" />
-                {[...siteConfig.moreFeatured, ...siteConfig.moreLinks].map(
-                  (item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      {item.title}
-                    </Link>
-                  ),
+                {siteConfig.showMoreMenu && (
+                  <>
+                    <div className="my-2 h-px bg-border" />
+                    {[...siteConfig.moreFeatured, ...siteConfig.moreLinks].map(
+                      (item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                        >
+                          {item.title}
+                        </Link>
+                      ),
+                    )}
+                  </>
                 )}
               </nav>
             </SheetContent>
