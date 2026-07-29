@@ -14,7 +14,12 @@ import {
 import { ArrowRight, Mail } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
-import { GitHubIcon, XIcon } from "@/components/icons";
+import {
+  GitHubIcon,
+  LinkedInIcon,
+  TelegramIcon,
+  XIcon,
+} from "@/components/icons";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -164,7 +169,17 @@ export function Hero() {
         >
           {[
             { href: siteConfig.social.github, label: "GitHub", Icon: GitHubIcon },
+            {
+              href: siteConfig.social.linkedin,
+              label: "LinkedIn",
+              Icon: LinkedInIcon,
+            },
             { href: siteConfig.social.twitter, label: "X (Twitter)", Icon: XIcon },
+            {
+              href: siteConfig.social.telegram,
+              label: "Telegram",
+              Icon: TelegramIcon,
+            },
             { href: `mailto:${siteConfig.social.email}`, label: "Email", Icon: Mail },
           ].map(({ href, label, Icon }) => (
             <a

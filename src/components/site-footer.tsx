@@ -1,17 +1,20 @@
 import Link from "next/link";
-import { Mail, ChevronRight } from "lucide-react";
+import { Mail } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
 import { footerColumns } from "@/lib/data";
-import { GitHubIcon, XIcon, LinkedInIcon } from "@/components/icons";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  GitHubIcon,
+  LinkedInIcon,
+  TelegramIcon,
+  XIcon,
+} from "@/components/icons";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)_1.4fr]">
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           {/* Brand */}
           <div className="space-y-4">
             <p className="text-lg font-semibold tracking-tight">
@@ -30,7 +33,7 @@ export function SiteFooter() {
                 <Mail className="size-5" />
               </a>
               <a
-                href="https://linkedin.com"
+                href={siteConfig.social.linkedin}
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label="LinkedIn"
@@ -56,6 +59,15 @@ export function SiteFooter() {
               >
                 <XIcon className="size-5" />
               </a>
+              <a
+                href={siteConfig.social.telegram}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="Telegram"
+                className="transition-colors hover:text-primary"
+              >
+                <TelegramIcon className="size-5" />
+              </a>
             </div>
           </div>
 
@@ -79,28 +91,6 @@ export function SiteFooter() {
               </ul>
             </nav>
           ))}
-
-          {/* Newsletter */}
-          <div className="space-y-3">
-            <p className="font-semibold">
-              Subscribe to {siteConfig.name}&apos;s blog newsletter
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Don&apos;t miss out 🔔. Get an email whenever I post, no spam.
-            </p>
-            <form className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                type="email"
-                required
-                placeholder="you@email.com"
-                aria-label="Email address"
-                className="rounded-full bg-secondary/40"
-              />
-              <Button type="submit" className="rounded-full">
-                Subscribe <ChevronRight className="size-4" />
-              </Button>
-            </form>
-          </div>
         </div>
 
         <div className="mt-14 border-t border-border/60 pt-6 text-center text-sm text-muted-foreground">

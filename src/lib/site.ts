@@ -21,6 +21,12 @@ export const siteConfig = {
     { title: "Shorts", href: "/shorts" },
     { title: "About", href: "/about" },
   ],
+  /**
+   * Hides the "More" mega-menu in the header, on desktop and in the mobile
+   * sheet. Everything it links to is still a placeholder page — flip to true
+   * once those have real content.
+   */
+  showMoreMenu: false,
   // "More" mega-menu
   moreFeatured: [
     {
@@ -61,8 +67,9 @@ export const siteConfig = {
   ],
   social: {
     github: "https://github.com/mrdiyorbek-juraev",
-    // TODO: still a placeholder — no handle on the CV to fill this in with.
-    twitter: "https://twitter.com/",
+    twitter: "https://x.com/D_Juraevv",
+    linkedin: "https://www.linkedin.com/in/diyorbek-juraev",
+    telegram: "https://t.me/Diyorbekk_dev",
     email: "mrdiyorbekjuraev@gmail.com",
   },
 } as const;
