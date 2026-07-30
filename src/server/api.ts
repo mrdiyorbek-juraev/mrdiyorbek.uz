@@ -9,7 +9,11 @@ import {
   recordView,
   type ContentKind,
 } from "@/server/stats";
-import { visitorHash } from "@/server/visitor";
+import {
+  VISITOR_COOKIE,
+  VISITOR_COOKIE_MAX_AGE,
+  resolveVisitor,
+} from "@/server/visitor";
 
 const kindParam = t.UnionEnum(["blog", "short"]);
 const slugParam = t.String({ pattern: "^[a-z0-9][a-z0-9-]{0,119}$" });
@@ -30,7 +34,28 @@ export const api = new Elysia({ prefix: "/api" })
     console.error("[api]", code, error);
     return status(503, { error: "Engagement store unavailable" });
   })
-  .derive(({ request }) => ({ visitor: visitorHash(request) }))
+  // Identity is pinned in a cookie on first contact so it survives browser
+  // updates and network changes; without that the 5-like cap silently resets
+  // every time a User-Agent or IP changes.
+  .derive(({ request, cookie }) => {
+    // Untyped without a cookie schema; resolveVisitor validates the shape, so
+    // an arbitrary string can't reach the database as a key.
+    const sent = cookie[VISITOR_COOKIE]?.value as string | undefined;
+    const { id, pin } = resolveVisitor(request, sent);
+
+    if (pin) {
+      cookie[VISITOR_COOKIE].set({
+        value: id,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: VISITOR_COOKIE_MAX_AGE,
+      });
+    }
+
+    return { visitor: id };
+  })
 
   .get("/health", () => ({ ok: true }))
 
