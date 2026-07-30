@@ -113,8 +113,6 @@ export async function getComments(
     const rows = (data ?? []) as Row[];
     if (rows.length === 0) return [];
 
-    // Author identity lives on auth.users, which PostgREST cannot join to, so
-    // resolve the distinct authors in one admin call rather than N.
     const authors = await resolveAuthors(rows.map((r) => r.author_id));
 
     const nodes: CommentNode[] = rows.map((row) => ({
@@ -202,6 +200,13 @@ export async function getCommenterMap(
   }
 }
 
+/**
+ * Names and avatars for a set of author ids.
+ *
+ * One query against the mirrored `profiles` table. This used to be one
+ * auth.admin.getUserById call per distinct author — an N+1 over HTTP against a
+ * database ~190ms away, on a page that already takes ~1.5s to reach it.
+ */
 async function resolveAuthors(
   ids: string[],
 ): Promise<Map<string, CommentAuthor>> {
@@ -210,18 +215,32 @@ async function resolveAuthors(
   if (!db) return out;
 
   const unique = [...new Set(ids)];
+  if (unique.length === 0) return out;
 
-  await Promise.all(
-    unique.map(async (id) => {
-      try {
-        const { data } = await db.auth.admin.getUserById(id);
-        const meta = data.user?.user_metadata as UserMeta | undefined;
-        out.set(id, authorFrom(id, meta));
-      } catch {
-        out.set(id, authorFrom(id, null));
-      }
-    }),
-  );
+  try {
+    const { data, error } = await db
+      .from("profiles")
+      .select("id, name, avatar_url")
+      .in("id", unique);
+
+    if (error) throw new Error(error.message);
+
+    for (const row of (data ?? []) as {
+      id: string;
+      name: string | null;
+      avatar_url: string | null;
+    }[]) {
+      out.set(row.id, {
+        id: row.id,
+        name: row.name ?? "Anonymous",
+        avatarUrl: row.avatar_url,
+      });
+    }
+  } catch (error) {
+    // Callers fall back to a placeholder author; a missing name shouldn't
+    // cost the reader the comment itself.
+    console.warn("[comments] resolveAuthors failed:", error);
+  }
 
   return out;
 }

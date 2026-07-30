@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,6 +10,7 @@ import {
   buildTree,
   countComments,
   pruneDeleted,
+  type CommentAuthor,
   type CommentNode,
 } from "@/server/comments";
 import type { ContentKind } from "@/lib/api";
@@ -54,18 +54,16 @@ export function CommentThread({
   const total = countComments(comments);
 
   const flatRef = React.useRef(flatten(initialComments));
-  const router = useRouter();
-  const refreshTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Authors already known, so a burst of comments from one person triggers a
+  // single lookup rather than one per comment.
+  const authorCache = React.useRef(
+    new Map<string, CommentAuthor>(
+      flatten(initialComments).map((n) => [n.author.id, n.author]),
+    ),
+  );
   // Read inside the realtime handler. Depending on `viewer` directly would
   // tear down and re-subscribe the channel on every sign-in or sign-out.
   const viewerIdRef = React.useRef<string | null>(null);
-
-  React.useEffect(
-    () => () => {
-      if (refreshTimer.current) clearTimeout(refreshTimer.current);
-    },
-    [],
-  );
 
   const rebuild = React.useCallback(() => {
     // Clone so buildTree isn't pushing into last render's arrays. Prune with
@@ -74,6 +72,45 @@ export function CommentThread({
     const fresh = flatRef.current.map((n) => ({ ...n, replies: [] }));
     setComments(pruneDeleted(buildTree(fresh)));
   }, []);
+
+  /**
+   * Fill in a name and avatar for an author we've never seen.
+   *
+   * Reads the public `profiles` table directly — the whole reason that table
+   * exists. auth.users is unreadable from the browser, so before it a comment
+   * arriving over realtime had no way to become anything but "Anonymous".
+   */
+  const resolveAuthor = React.useCallback(async (authorId: string) => {
+    const db = getBrowserClient();
+    if (!db || authorCache.current.has(authorId)) return;
+
+    // Claim it up front so concurrent arrivals don't each fire a query.
+    authorCache.current.set(authorId, authorFrom(authorId, null));
+
+    const { data } = await db
+      .from("profiles")
+      .select("id, name, avatar_url")
+      .eq("id", authorId)
+      .maybeSingle();
+
+    if (!data) return;
+
+    const author = {
+      id: authorId,
+      name: (data.name as string | null) ?? "Anonymous",
+      avatarUrl: (data.avatar_url as string | null) ?? null,
+    };
+    authorCache.current.set(authorId, author);
+
+    // Re-stamp any comments already on screen under the placeholder.
+    let touched = false;
+    flatRef.current = flatRef.current.map((n) => {
+      if (n.author.id !== authorId) return n;
+      touched = true;
+      return { ...n, author };
+    });
+    if (touched) rebuild();
+  }, [rebuild]);
 
   const upsert = React.useCallback(
     (node: CommentNode) => {
@@ -128,13 +165,12 @@ export function CommentThread({
           const existing = flatRef.current.find((n) => n.id === id);
           const authorId = String(row.author_id);
 
-          // The WAL row carries author_id but no profile, and only the server
-          // can turn one into a name and avatar. If this is someone we haven't
-          // seen, ask the server component to re-render rather than leaving
-          // "Anonymous" on screen. Debounced so a burst is one refresh.
-          if (!existing && authorId !== viewerIdRef.current) {
-            if (refreshTimer.current) clearTimeout(refreshTimer.current);
-            refreshTimer.current = setTimeout(() => router.refresh(), 1200);
+          // The WAL row carries author_id but no profile. Look the author up
+          // in `profiles` — previously this asked the server component to
+          // re-render, which on an ISR-cached page could serve the same stale
+          // payload and leave "Anonymous" on screen permanently.
+          if (!existing && !authorCache.current.has(authorId)) {
+            void resolveAuthor(authorId);
           }
 
           upsert({
@@ -160,7 +196,7 @@ export function CommentThread({
     return () => {
       void db.removeChannel(channel);
     };
-  }, [kind, slug, upsert, router]);
+  }, [kind, slug, upsert, resolveAuthor]);
 
   async function signIn(provider: "github" | "google") {
     const db = getBrowserClient();

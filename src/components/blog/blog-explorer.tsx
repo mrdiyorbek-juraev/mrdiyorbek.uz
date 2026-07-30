@@ -6,6 +6,7 @@ import { Search, Newspaper, CalendarDays, Check, ChevronsUpDown } from "lucide-r
 
 import type { PostWithStats } from "@/lib/blog";
 import { cn } from "@/lib/utils";
+import { useLiveStats } from "@/hooks/use-live-stats";
 import { PostRow } from "@/components/post-row";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +26,18 @@ const sortLabels: Record<SortKey, string> = {
   likes: "Most liked",
 };
 
-export function BlogExplorer({ posts }: { posts: PostWithStats[] }) {
+export function BlogExplorer({ posts: initial }: { posts: PostWithStats[] }) {
+  // The page is ISR-cached, so its counters can be up to five minutes stale.
+  // This corrects them on mount and then keeps them live.
+  const live = useLiveStats("blog");
+  const posts = React.useMemo(
+    () =>
+      initial.map((post) =>
+        live[post.slug] ? { ...post, ...live[post.slug] } : post,
+      ),
+    [initial, live],
+  );
+
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState<string[]>([]);
   const [sort, setSort] = React.useState<SortKey>("date-desc");

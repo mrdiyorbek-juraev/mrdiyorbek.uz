@@ -18,8 +18,18 @@ import { getBrowserClient } from "@/lib/supabase/client";
  */
 const FLUSH_DELAY = 400;
 
-/** Broadcast event carrying what changed, as a delta. */
-type Bump = { views?: number; likes?: number };
+/**
+ * Broadcast payload: which post changed, and by how much.
+ *
+ * The channel is per *kind*, not per post, so a list page can follow every
+ * card with one subscription instead of one per row. The slug travels in the
+ * payload and receivers ignore what isn't theirs.
+ */
+export type Bump = { slug: string; views?: number; likes?: number };
+
+/** One channel for all content of a kind — see Bump. */
+export const bumpChannel = (kind: ContentKind) => `content:${kind}`;
+export const BUMP_EVENT = "bump";
 
 /**
  * In-flight view requests, keyed by content. Two effect runs for the same
@@ -117,13 +127,16 @@ export function useContentStats({ kind, slug, initial }: Options) {
    * Fire-and-forget by design. A dropped bump self-corrects on the next
    * refetch, and blocking a click on an ack would defeat the purpose.
    */
-  const bump = React.useCallback((delta: Bump) => {
-    void channel.current?.send({
-      type: "broadcast",
-      event: "bump",
-      payload: delta,
-    });
-  }, []);
+  const bump = React.useCallback(
+    (delta: Omit<Bump, "slug">) => {
+      void channel.current?.send({
+        type: "broadcast",
+        event: BUMP_EVENT,
+        payload: { slug, ...delta } satisfies Bump,
+      });
+    },
+    [slug],
+  );
 
   /** Pull authoritative counters and replace whatever deltas accumulated. */
   const resync = React.useCallback(async () => {
@@ -223,13 +236,15 @@ export function useContentStats({ kind, slug, initial }: Options) {
     const db = getBrowserClient();
     if (!db) return; // No anon key configured — counters just stay static.
 
-    const ch = db.channel(`content:${kind}:${slug}`, {
+    const ch = db.channel(bumpChannel(kind), {
       // Senders already applied their own change optimistically.
       config: { broadcast: { self: false } },
     });
 
-    ch.on("broadcast", { event: "bump" }, ({ payload }) => {
+    ch.on("broadcast", { event: BUMP_EVENT }, ({ payload }) => {
       const delta = (payload ?? {}) as Bump;
+      // Shared channel — ignore bumps for other posts.
+      if (delta.slug !== slug) return;
       const cur = ref.current;
       commit({
         views: cur.views + (Number(delta.views) || 0),
