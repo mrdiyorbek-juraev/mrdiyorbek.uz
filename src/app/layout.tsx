@@ -8,6 +8,7 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
+import { QueryProvider } from "@/components/query-provider";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -124,12 +125,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SmoothScroll>
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-          </SmoothScroll>
-          <Toaster />
+          <QueryProvider>
+            <SmoothScroll>
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
+            </SmoothScroll>
+            <Toaster />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

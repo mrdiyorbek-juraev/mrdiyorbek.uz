@@ -7,12 +7,15 @@ import { toast } from "sonner";
 import {
   MAX_COMMENT_DEPTH,
   authorFrom,
-  buildTree,
   countComments,
-  pruneDeleted,
-  type CommentAuthor,
   type CommentNode,
 } from "@/server/comments";
+import {
+  useComments,
+  useDeleteComment,
+  usePostComment,
+  useRefreshComments,
+} from "@/hooks/use-comments";
 import type { ContentKind } from "@/lib/api";
 import { getBrowserClient } from "@/lib/supabase/client";
 import { GitHubIcon, GoogleIcon } from "@/components/icons";
@@ -30,21 +33,17 @@ type Props = {
   ownerId?: string;
 };
 
-/** Flatten a tree back to a list so a change can be re-applied and re-nested. */
-function flatten(nodes: CommentNode[]): CommentNode[] {
-  return nodes.flatMap((n) => [
-    { ...n, replies: [] },
-    ...flatten(n.replies),
-  ]);
-}
-
 export function CommentThread({
   kind,
   slug,
   initialComments,
   ownerId,
 }: Props) {
-  const [comments, setComments] = React.useState(initialComments);
+  // Server render seeds the cache; React Query refetches on mount because the
+  // page is ISR-cached for 300s and its embedded copy is usually stale.
+  const { data: comments = [] } = useComments(kind, slug, initialComments);
+  const refresh = useRefreshComments(kind, slug);
+
   // Resolved on the client. The page cannot read cookies without giving up
   // static generation, so a signed-in reader sees the sign-in prompt for a
   // moment before the form replaces it.
@@ -53,95 +52,28 @@ export function CommentThread({
   // is not something to advertise in the heading.
   const total = countComments(comments);
 
-  const flatRef = React.useRef(flatten(initialComments));
-  // Authors already known, so a burst of comments from one person triggers a
-  // single lookup rather than one per comment.
-  const authorCache = React.useRef(
-    new Map<string, CommentAuthor>(
-      flatten(initialComments).map((n) => [n.author.id, n.author]),
-    ),
-  );
-  // Read inside the realtime handler. Depending on `viewer` directly would
-  // tear down and re-subscribe the channel on every sign-in or sign-out.
-  const viewerIdRef = React.useRef<string | null>(null);
+  const postComment = usePostComment(kind, slug, viewer);
+  const deleteComment = useDeleteComment(kind, slug);
 
-  const rebuild = React.useCallback(() => {
-    // Clone so buildTree isn't pushing into last render's arrays. Prune with
-    // the same rule the server uses, or a comment deleted in this session
-    // would linger as a tombstone until reload.
-    const fresh = flatRef.current.map((n) => ({ ...n, replies: [] }));
-    setComments(pruneDeleted(buildTree(fresh)));
-  }, []);
-
-  /**
-   * Fill in a name and avatar for an author we've never seen.
-   *
-   * Reads the public `profiles` table directly — the whole reason that table
-   * exists. auth.users is unreadable from the browser, so before it a comment
-   * arriving over realtime had no way to become anything but "Anonymous".
-   */
-  const resolveAuthor = React.useCallback(async (authorId: string) => {
-    const db = getBrowserClient();
-    if (!db || authorCache.current.has(authorId)) return;
-
-    // Claim it up front so concurrent arrivals don't each fire a query.
-    authorCache.current.set(authorId, authorFrom(authorId, null));
-
-    const { data } = await db
-      .from("profiles")
-      .select("id, name, avatar_url")
-      .eq("id", authorId)
-      .maybeSingle();
-
-    if (!data) return;
-
-    const author = {
-      id: authorId,
-      name: (data.name as string | null) ?? "Anonymous",
-      avatarUrl: (data.avatar_url as string | null) ?? null,
-    };
-    authorCache.current.set(authorId, author);
-
-    // Re-stamp any comments already on screen under the placeholder.
-    let touched = false;
-    flatRef.current = flatRef.current.map((n) => {
-      if (n.author.id !== authorId) return n;
-      touched = true;
-      return { ...n, author };
-    });
-    if (touched) rebuild();
-  }, [rebuild]);
-
-  const upsert = React.useCallback(
-    (node: CommentNode) => {
-      const i = flatRef.current.findIndex((n) => n.id === node.id);
-      if (i >= 0) flatRef.current[i] = node;
-      else flatRef.current.push(node);
-      flatRef.current.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-      rebuild();
-    },
-    [rebuild],
-  );
-
-  // Resolve the session, then track sign-in/sign-out without a page reload.
-  // onAuthStateChange emits INITIAL_SESSION on subscribe, so this covers both
-  // the first read and every later change.
   React.useEffect(() => {
     const db = getBrowserClient();
     if (!db) return;
 
-    const { data } = db.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user;
-      viewerIdRef.current = user?.id ?? null;
+    db.auth.getSession().then(({ data }) => {
+      const user = data.session?.user;
       setViewer(user ? authorFrom(user.id, user.user_metadata) : null);
     });
 
-    return () => data.subscription.unsubscribe();
+    const { data: sub } = db.auth.onAuthStateChange((_e, session) => {
+      const user = session?.user;
+      setViewer(user ? authorFrom(user.id, user.user_metadata) : null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Live thread. postgres_changes rather than broadcast here, unlike the like
-  // counter: a comment has to be durably stored before anyone should see it,
-  // so riding the WAL costs nothing and cannot be forged by a client.
+  // Someone else commented: let the query refetch rather than patching the
+  // tree by hand. depth is derived by a trigger and the author needs a profile
+  // lookup, so the server's shape is the only one worth trusting.
   React.useEffect(() => {
     const db = getBrowserClient();
     if (!db) return;
@@ -154,49 +86,16 @@ export function CommentThread({
           event: "*",
           schema: "public",
           table: "comments",
-          // One condition only, so filter on slug and check kind below.
           filter: `slug=eq.${slug}`,
         },
-        (payload) => {
-          const row = payload.new as Record<string, unknown> | null;
-          if (!row || row.kind !== kind) return;
-
-          const id = String(row.id);
-          const existing = flatRef.current.find((n) => n.id === id);
-          const authorId = String(row.author_id);
-
-          // The WAL row carries author_id but no profile. Look the author up
-          // in `profiles` — previously this asked the server component to
-          // re-render, which on an ISR-cached page could serve the same stale
-          // payload and leave "Anonymous" on screen permanently.
-          if (!existing && !authorCache.current.has(authorId)) {
-            void resolveAuthor(authorId);
-          }
-
-          upsert({
-            id,
-            parentId: (row.parent_id as string | null) ?? null,
-            depth: Number(row.depth ?? 0),
-            body: row.deleted_at ? "" : String(row.body ?? ""),
-            createdAt: String(row.created_at),
-            editedAt: (row.edited_at as string | null) ?? null,
-            deleted: Boolean(row.deleted_at),
-            // The realtime row carries author_id but no profile — reuse what we
-            // already have, and fall back to a placeholder for a stranger's
-            // first comment until the next server render fills it in.
-            author:
-              existing?.author ??
-              authorFrom(String(row.author_id), null),
-            replies: [],
-          });
-        },
+        () => void refresh(),
       )
       .subscribe();
 
     return () => {
       void db.removeChannel(channel);
     };
-  }, [kind, slug, upsert, resolveAuthor]);
+  }, [kind, slug, refresh]);
 
   async function signIn(provider: "github" | "google") {
     const db = getBrowserClient();
@@ -222,62 +121,25 @@ export function CommentThread({
   async function signOut() {
     const db = getBrowserClient();
     if (!db) return;
-    // Clears the client session; onAuthStateChange swaps the form back to the
-    // sign-in prompt without a reload.
     await db.auth.signOut();
   }
 
   async function post(parentId: string | null, body: string) {
-    const db = getBrowserClient();
-    if (!db || !viewer) return false;
-
-    const { data, error } = await db
-      .from("comments")
-      .insert({ kind, slug, parent_id: parentId, body, author_id: viewer.id })
-      .select("id, parent_id, depth, body, created_at, edited_at, deleted_at")
-      .single();
-
-    if (error || !data) {
-      toast.error(
-        error?.message.includes("rate limit")
-          ? "You're commenting a bit fast — try again in a few minutes."
-          : "Couldn't post that comment.",
-      );
-      return false;
+    try {
+      await postComment.mutateAsync({ parentId, body });
+      return true;
+    } catch {
+      return false; // the mutation already surfaced a toast
     }
-
-    upsert({
-      id: String(data.id),
-      parentId: data.parent_id ?? null,
-      depth: Number(data.depth ?? 0),
-      body: String(data.body),
-      createdAt: String(data.created_at),
-      editedAt: null,
-      deleted: false,
-      author: { id: viewer.id, name: viewer.name, avatarUrl: viewer.avatarUrl },
-      replies: [],
-    });
-    return true;
   }
 
   async function remove(id: string) {
-    const db = getBrowserClient();
-    if (!db) return false;
-
-    // Soft delete, so replies underneath survive.
-    const { error } = await db
-      .from("comments")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Couldn't delete that comment.");
+    try {
+      await deleteComment.mutateAsync(id);
+      return true;
+    } catch {
       return false;
     }
-
-    const node = flatRef.current.find((n) => n.id === id);
-    if (node) upsert({ ...node, body: "", deleted: true });
-    return true;
   }
 
   return (
