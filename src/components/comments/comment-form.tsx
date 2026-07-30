@@ -15,6 +15,10 @@ type Props = {
   placeholder?: string;
   submitLabel?: string;
   autoFocus?: boolean;
+  /** Pre-fills the box — used when editing an existing comment. */
+  initialValue?: string;
+  /** Drops the avatar gutter, for editing inline where one is already shown. */
+  compact?: boolean;
   onSubmit: (body: string) => Promise<boolean>;
   onCancel?: () => void;
 };
@@ -24,10 +28,12 @@ export function CommentForm({
   placeholder = "Share your thoughts…",
   submitLabel = "Post comment",
   autoFocus = false,
+  initialValue = "",
+  compact = false,
   onSubmit,
   onCancel,
 }: Props) {
-  const [body, setBody] = React.useState("");
+  const [body, setBody] = React.useState(initialValue);
   const [busy, setBusy] = React.useState(false);
 
   const trimmed = body.trim();
@@ -47,7 +53,9 @@ export function CommentForm({
 
   return (
     <div className="flex gap-3">
-      <Avatar size="sm" className="mt-1">
+      {/* Editing happens inline beneath the comment's own avatar, so a second
+          one would just be noise. */}
+      <Avatar size="sm" className={cn("mt-1", compact && "hidden")}>
         {viewer.avatarUrl && (
           <AvatarImage
             src={viewer.avatarUrl}

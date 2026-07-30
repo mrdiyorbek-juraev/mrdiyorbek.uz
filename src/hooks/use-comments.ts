@@ -183,6 +183,68 @@ export function usePostComment(
   });
 }
 
+export function useEditComment(kind: ContentKind, slug: string) {
+  const qc = useQueryClient();
+  const key = commentsKey(kind, slug);
+
+  return useMutation({
+    mutationFn: async ({ id, body }: { id: string; body: string }) => {
+      const db = getBrowserClient();
+      if (!db) throw new Error("Comments aren't configured yet.");
+
+      // edited_at is deliberately not sent — the trigger stamps it, so an
+      // edit cannot be hidden by omitting the field.
+      const { error } = await db
+        .from("comments")
+        .update({ body: body.trim() })
+        .eq("id", id);
+
+      if (error) {
+        throw new Error(
+          error.message.includes("only the author")
+            ? "You can only edit your own comments."
+            : "Couldn't save that edit.",
+        );
+      }
+    },
+
+    // Optimistic: the reader is looking straight at the text they just changed.
+    onMutate: async ({ id, body }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<CommentNode[]>(key);
+
+      qc.setQueryData<CommentNode[]>(key, (old) =>
+        old ? applyEdit(old, id, body.trim()) : old,
+      );
+
+      return { previous };
+    },
+    onError: (e: Error, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(key, ctx.previous);
+      toast.error(e.message);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: key }),
+  });
+}
+
+/** Immutably rewrite one node's body, marking it edited. */
+function applyEdit(
+  nodes: CommentNode[],
+  id: string,
+  body: string,
+): CommentNode[] {
+  return nodes.map((node) =>
+    node.id === id
+      ? {
+          ...node,
+          body,
+          editedAt: new Date().toISOString(),
+          replies: applyEdit(node.replies, id, body),
+        }
+      : { ...node, replies: applyEdit(node.replies, id, body) },
+  );
+}
+
 export function useDeleteComment(kind: ContentKind, slug: string) {
   const qc = useQueryClient();
   const key = commentsKey(kind, slug);

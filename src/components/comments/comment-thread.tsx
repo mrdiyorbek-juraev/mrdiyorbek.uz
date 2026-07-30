@@ -13,6 +13,7 @@ import {
 import {
   useComments,
   useDeleteComment,
+  useEditComment,
   usePostComment,
   useRefreshComments,
 } from "@/hooks/use-comments";
@@ -54,6 +55,7 @@ export function CommentThread({
 
   const postComment = usePostComment(kind, slug, viewer);
   const deleteComment = useDeleteComment(kind, slug);
+  const editComment = useEditComment(kind, slug);
 
   React.useEffect(() => {
     const db = getBrowserClient();
@@ -142,6 +144,15 @@ export function CommentThread({
     }
   }
 
+  async function edit(id: string, body: string) {
+    try {
+      await editComment.mutateAsync({ id, body });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   return (
     <section aria-labelledby="comments-heading" className="scroll-mt-24">
       <div className="flex items-center gap-2">
@@ -205,6 +216,7 @@ export function CommentThread({
                 ownerId={ownerId}
                 onReply={(parentId, body) => post(parentId, body)}
                 onDelete={remove}
+                onEdit={edit}
               />
             ))}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Reply, Trash2 } from "lucide-react";
+import { Pencil, Reply, Trash2 } from "lucide-react";
 
 import { MAX_COMMENT_DEPTH, type CommentNode } from "@/server/comments";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -19,6 +19,7 @@ type Props = {
   ownerId?: string;
   onReply: (parentId: string, body: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  onEdit: (id: string, body: string) => Promise<boolean>;
 };
 
 export function CommentItem({
@@ -27,9 +28,11 @@ export function CommentItem({
   ownerId,
   onReply,
   onDelete,
+  onEdit,
 }: Props) {
   const [replying, setReplying] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
+  const [editing, setEditing] = React.useState(false);
 
   // Client-only: a relative timestamp rendered on the server would be frozen
   // into the cached HTML and insist a comment was posted "2 minutes ago" for
@@ -97,17 +100,43 @@ export function CommentItem({
 
             {/* Plain text. Never a markdown or MDX pipeline — this is
                 untrusted input and React's escaping is the whole defence. */}
-            <p
-              className={cn(
-                "mt-1.5 text-sm leading-relaxed whitespace-pre-wrap wrap-break-word",
-                comment.deleted && "italic text-muted-foreground",
-              )}
-            >
-              {comment.deleted ? "This comment was removed." : comment.body}
-            </p>
+            {/* `viewer` is implied by isMine gating the Edit button, but the
+                type doesn't know that — and signing out mid-edit is real. */}
+            {editing && viewer ? (
+              <div className="mt-2">
+                <CommentForm
+                  viewer={viewer}
+                  initialValue={comment.body}
+                  submitLabel="Save changes"
+                  autoFocus
+                  compact
+                  onCancel={() => setEditing(false)}
+                  onSubmit={async (body) => {
+                    // Unchanged text is a cancel, not an edit — otherwise it
+                    // would stamp edited_at for nothing.
+                    if (body.trim() === comment.body.trim()) {
+                      setEditing(false);
+                      return true;
+                    }
+                    const ok = await onEdit(comment.id, body);
+                    if (ok) setEditing(false);
+                    return ok;
+                  }}
+                />
+              </div>
+            ) : (
+              <p
+                className={cn(
+                  "mt-1.5 text-sm leading-relaxed whitespace-pre-wrap wrap-break-word",
+                  comment.deleted && "italic text-muted-foreground",
+                )}
+              >
+                {comment.deleted ? "This comment was removed." : comment.body}
+              </p>
+            )}
 
             <div className="mt-2 flex flex-wrap items-center gap-1">
-              {canReply && !comment.deleted && (
+              {canReply && !comment.deleted && !editing && (
                 <Button
                   size="xs"
                   variant="ghost"
@@ -117,7 +146,19 @@ export function CommentItem({
                 </Button>
               )}
 
-              {canDelete && !comment.deleted && (
+              {/* Only the author, never the owner — moderation may remove a
+                  comment but must not rewrite what someone said. */}
+              {isMine && !comment.deleted && !editing && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => setEditing(true)}
+                >
+                  <Pencil /> Edit
+                </Button>
+              )}
+
+              {canDelete && !comment.deleted && !editing && (
                 <Button
                   size="xs"
                   variant="ghost"
@@ -172,6 +213,7 @@ export function CommentItem({
               ownerId={ownerId}
               onReply={onReply}
               onDelete={onDelete}
+              onEdit={onEdit}
             />
           ))}
         </div>
