@@ -10,6 +10,13 @@ export const siteConfig = {
   author: "Diyorbek",
   /** Legal name, for structured data and social cards — what people search. */
   fullName: "Diyorbek Juraev",
+  /**
+   * Supabase auth user id of the site owner. Drives the "Author" badge and
+   * shows moderation controls. It is NOT the security boundary — that lives in
+   * RLS via is_site_owner(), so a tampered client gains nothing. Keep it in
+   * sync with site_settings.owner_user_id.
+   */
+  ownerUserId: "f01aca7e-67bc-4c20-acbf-5e7e61aa8fce",
   role: "Software Engineer · OctaneJS Core Team",
   status: "Currently open for remote opportunities",
   work: {

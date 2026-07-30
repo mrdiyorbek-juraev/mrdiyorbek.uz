@@ -4,6 +4,7 @@ import type { PostWithStats } from "@/lib/blog";
 import { cn, formatDate, thumbGradient } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { StatBar } from "@/components/content/stat-bar";
+import { CommenterAvatars } from "@/components/comments/commenter-avatars";
 
 export function PostRow({ post }: { post: PostWithStats }) {
   return (
@@ -40,6 +41,9 @@ export function PostRow({ post }: { post: PostWithStats }) {
               </span>
             )}
           </StatBar>
+
+          {/* Only rendered once someone has actually commented. */}
+          <CommenterAvatars commenters={post.commenters} className="pt-1" />
         </div>
 
         <div

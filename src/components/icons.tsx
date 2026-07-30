@@ -1,8 +1,11 @@
 import type { SVGProps } from "react";
 
-// Re-exported from simple-icons so the mark stays accurate rather than
+// Re-exported from simple-icons so the marks stay accurate rather than
 // hand-traced, while call sites keep importing every brand icon from here.
-export { SiTelegram as TelegramIcon } from "@icons-pack/react-simple-icons";
+export {
+  SiTelegram as TelegramIcon,
+  SiGoogle as GoogleIcon,
+} from "@icons-pack/react-simple-icons";
 
 export function GitHubIcon(props: SVGProps<SVGSVGElement>) {
   return (

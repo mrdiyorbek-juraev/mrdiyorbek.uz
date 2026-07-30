@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { getAllPosts } from "@/lib/blog";
 import { getStatsMap, withStats } from "@/server/stats";
+import { getCommenterMap } from "@/server/comments";
 import { BlogExplorer } from "@/components/blog/blog-explorer";
 
 export const metadata: Metadata = {
@@ -16,6 +17,13 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function BlogPage() {
-  const posts = withStats(getAllPosts(), await getStatsMap("blog"));
+  const [stats, commenters] = await Promise.all([
+    getStatsMap("blog"),
+    getCommenterMap("blog"),
+  ]);
+  const posts = withStats(getAllPosts(), stats).map((post) => ({
+    ...post,
+    commenters: commenters.get(post.slug),
+  }));
   return <BlogExplorer posts={posts} />;
 }

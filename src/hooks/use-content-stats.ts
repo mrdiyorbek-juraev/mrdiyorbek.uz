@@ -10,7 +10,7 @@ import {
   type ContentKind,
   type StatsWithViewer,
 } from "@/lib/api";
-import { getBrowserDb } from "@/lib/supabase-browser";
+import { getBrowserClient } from "@/lib/supabase/client";
 
 /**
  * Only the first tap waits; it fires straight away so other readers see
@@ -220,7 +220,7 @@ export function useContentStats({ kind, slug, initial }: Options) {
   // postgres_changes rides the write-ahead log, so it inherits the full write
   // latency it was meant to hide; broadcast never touches Postgres.
   React.useEffect(() => {
-    const db = getBrowserDb();
+    const db = getBrowserClient();
     if (!db) return; // No anon key configured — counters just stay static.
 
     const ch = db.channel(`content:${kind}:${slug}`, {

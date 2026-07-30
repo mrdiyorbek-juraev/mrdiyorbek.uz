@@ -22,8 +22,15 @@ export type Post = PostMeta & {
   content: string;
 };
 
-/** A post joined with its live counters, as list pages render it. */
-export type PostWithStats = PostMeta & { views: number; likes: number };
+/**
+ * A post joined with its live counters, as list pages render it. `commenters`
+ * is optional so a page that doesn't need the avatar stack needn't fetch it.
+ */
+export type PostWithStats = PostMeta & {
+  views: number;
+  likes: number;
+  commenters?: import("@/server/comments").Commenters;
+};
 
 function readPostFile(slug: string): Post | null {
   const fullPath = path.join(BLOG_DIR, `${slug}.mdx`);

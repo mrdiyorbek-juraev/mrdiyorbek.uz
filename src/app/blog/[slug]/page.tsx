@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
 import { siteConfig } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
+import { countComments, getComments } from "@/server/comments";
+import { CommentThread } from "@/components/comments/comment-thread";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Mdx } from "@/components/mdx";
@@ -23,6 +25,10 @@ type Props = {
 export function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
 }
+
+// Keeps the article static while letting the server-rendered thread refresh,
+// so a crawler hitting a cold page still sees recent comments in the HTML.
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -66,6 +72,13 @@ export default async function PostPage({ params }: Props) {
 
   if (!post) notFound();
 
+  // Comments only — deliberately no getCurrentUser() here. Reading cookies in
+  // a page opts it out of static generation entirely, turning every post view
+  // into a server render. The thread resolves the signed-in user on the client
+  // instead, which costs a brief moment before the form appears.
+  const comments = await getComments("blog", post.slug);
+  const commentCount = countComments(comments);
+
   const url = `${siteConfig.url}/blog/${post.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
@@ -76,6 +89,7 @@ export default async function PostPage({ params }: Props) {
     dateModified: post.date,
     inLanguage: post.lang,
     keywords: post.tags.join(", "),
+    commentCount,
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     author: {
       "@type": "Person",
@@ -139,6 +153,15 @@ export default async function PostPage({ params }: Props) {
         <Separator />
 
         <LikeButton className="py-4" />
+
+        <Separator />
+
+        <CommentThread
+          kind="blog"
+          slug={post.slug}
+          initialComments={comments}
+          ownerId={siteConfig.ownerUserId}
+        />
       </PageShell>
     </EngagementProvider>
   );
