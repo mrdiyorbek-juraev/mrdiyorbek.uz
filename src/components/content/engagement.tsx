@@ -78,11 +78,24 @@ export function ArticleStats({
  * and are flushed as one request; the dots show how much of the allowance is
  * spent.
  */
-export function LikeButton({ className }: { className?: string }) {
+export function LikeButton({
+  className,
+  /** Left-aligned and without the helper text, for the article rail. */
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
   const { likes, yourLikes, maxedOut, loaded, like } = useEngagement();
 
   return (
-    <div className={cn("flex flex-col items-center gap-3", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-3",
+        compact ? "items-start" : "items-center",
+        className,
+      )}
+    >
       <button
         type="button"
         onClick={like}
@@ -145,11 +158,15 @@ export function LikeButton({ className }: { className?: string }) {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        {maxedOut
-          ? "Thanks — that's all five!"
-          : `Tap up to ${MAX_LIKES_PER_VISITOR} times`}
-      </p>
+      {/* The rail is narrow and permanently on screen; the instruction is
+          already given by the copy under the article. */}
+      {!compact && (
+        <p className="text-xs text-muted-foreground">
+          {maxedOut
+            ? "Thanks — that's all five!"
+            : `Tap up to ${MAX_LIKES_PER_VISITOR} times`}
+        </p>
+      )}
     </div>
   );
 }

@@ -129,6 +129,19 @@
   }
   html {
     @apply font-sans;
+    /* Anchor jumps animate instead of teleporting. Lenis overrides this to
+       `auto` while it is driving the page (see the .lenis rules below), so
+       this covers the case where Lenis is not mounted or has been disabled. */
+    scroll-behavior: smooth;
+    /* Clears the fixed header, so a heading never lands underneath it. */
+    scroll-padding-top: 6rem;
+  }
+  /* Honour the OS setting — an unrequested animated scroll is a common
+     vestibular trigger. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 

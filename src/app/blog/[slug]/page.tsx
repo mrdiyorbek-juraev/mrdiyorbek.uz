@@ -6,12 +6,14 @@ import { ArrowLeft } from "lucide-react";
 import { getAllSlugs, getPostBySlug } from "@/lib/blog";
 import { siteConfig } from "@/lib/site";
 import { formatDate } from "@/lib/utils";
+import { getHeadings } from "@/lib/toc";
 import { countComments, getComments } from "@/server/comments";
 import { CommentThread } from "@/components/comments/comment-thread";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Mdx } from "@/components/mdx";
 import { PageShell } from "@/components/page-shell";
+import { TableOfContents } from "@/components/blog/table-of-contents";
 import {
   ArticleStats,
   EngagementProvider,
@@ -79,6 +81,7 @@ export default async function PostPage({ params }: Props) {
   const comments = await getComments("blog", post.slug);
   const commentCount = countComments(comments);
 
+  const headings = getHeadings(post.content);
   const url = `${siteConfig.url}/blog/${post.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
@@ -112,7 +115,10 @@ export default async function PostPage({ params }: Props) {
         // Values come from local MDX frontmatter, not user input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PageShell className="space-y-8">
+      {/* Wide shell so the sticky rail has somewhere to live. The article
+          column keeps its own measure — long lines hurt more than a gap. */}
+      <PageShell wide className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+        <div className="min-w-0 max-w-3xl space-y-8">
         <Link
           href="/blog"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -144,6 +150,9 @@ export default async function PostPage({ params }: Props) {
 
         <Separator />
 
+        {/* Collapsed inline on small screens, where there is no rail. */}
+        <TableOfContents headings={headings} variant="inline" />
+
         {/* The body may not be in the site's default language; declaring it
             lets Google and screen readers treat the text correctly. */}
         <div lang={post.lang}>
@@ -162,6 +171,21 @@ export default async function PostPage({ params }: Props) {
           initialComments={comments}
           ownerId={siteConfig.ownerUserId}
         />
+        </div>
+
+        {/* The whole rail is sticky, not just the list — otherwise the like
+            button scrolls away while the contents stay put. max-h + overflow
+            so a long table can still scroll inside a short viewport. */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pb-2">
+            <TableOfContents headings={headings} variant="rail" />
+            <div className="mt-8 border-t border-border/60 pt-6">
+              {/* Same EngagementProvider as the button under the article, so
+                  tapping either updates both. */}
+              <LikeButton compact />
+            </div>
+          </div>
+        </aside>
       </PageShell>
     </EngagementProvider>
   );
