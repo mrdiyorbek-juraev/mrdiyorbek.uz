@@ -7,7 +7,22 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypePrettyCode from "rehype-pretty-code";
 
+import { AmbiguityQuiz } from "@/components/mdx/ambiguity-quiz";
+import { BeforeAfter } from "@/components/mdx/before-after";
+import { CopyCommand } from "@/components/mdx/copy-command";
+import { Callout, PullQuote, Step } from "@/components/mdx/callout";
+
+/**
+ * Components a post can use by name in MDX. Client components are fine here —
+ * next-mdx-remote renders them as islands inside the server-rendered article.
+ */
 const components = {
+  AmbiguityQuiz,
+  BeforeAfter,
+  Callout,
+  CopyCommand,
+  PullQuote,
+  Step,
   a: ({ href = "", ...props }: ComponentPropsWithoutRef<"a">) => {
     const isInternal = href.startsWith("/") || href.startsWith("#");
     if (isInternal) {

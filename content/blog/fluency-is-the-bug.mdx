@@ -1,0 +1,321 @@
+---
+title: Fluency is the bug
+description: The aerospace industry spent forty years proving you cannot train people to notice ambiguity. That finding has an uncomfortable implication for everyone writing prompts today.
+date: 2026-07-31
+tags: ["ai", "writing", "prompts", "language"]
+published: true
+lang: en
+image: /blog/ste100.png
+---
+
+![An ASD-STE100 maintenance manual open to a single instruction — "Close the valve" — with its rules flowing into a language model's parse tree and a structured result](/blog/ste100.png)
+
+<Step>01 — Hook</Step>
+
+## Read this instruction
+
+<AmbiguityQuiz
+  prompt="What does this tell you to do?"
+  sentence="Follow the safety instructions."
+  optionA="Obey them"
+  responseA="Almost everyone picks this one. So did the technicians. The other reading — walk behind the safety instructions — is absurd in context, which is precisely why your brain discarded it without telling you. You did not weigh two options. You experienced one meaning, and it felt like the only one."
+  optionB="Walk behind them"
+  responseB="A rare answer — and technically valid, which is the whole point. Follow means both obey and come after. Most readers take the first meaning without ever registering that a second one existed. That silent resolution is what this article is about."
+/>
+
+Both readings are grammatically valid. *Follow* means *obey*, and it also means
+*come after*. You picked one instantly and never saw the other.
+
+That is not a mistake. That is what fluent reading **is**. And it is the reason
+a group of aerospace engineers concluded, in the 1980s, that English itself had
+to be replaced.
+
+<Step>02 — Story</Step>
+
+## The manuals were fine
+
+By the late 1970s, European aircraft manufacturers had a problem they could not
+explain away. Maintenance technicians were misreading instructions in manuals
+that were, by every available measure, well written. Clear English. Correct
+grammar. Reviewed by professionals.
+
+The airlines had noticed something about who was reading them. Roughly 80% of
+the carriers asking for a fix were not from English-speaking countries. Their
+technicians read English as a second or third language, on a hangar floor, at
+speed, at night, with no way to phone the author and ask what a sentence meant.
+
+And a misread instruction on an aircraft does not throw an error. It produces a
+hull loss.
+
+So in June 1983, at the Fokker plant near Schiphol Airport, a working group of
+engineers, linguists and technical writers sat down to fix it.
+
+<Step>03 — The problem</Step>
+
+## The first twist: it was never about the readers
+
+The obvious fixes had all been tried. Train the technicians better. Hire better
+authors. Add more diagrams. Simplify the vocabulary a little. None of it moved
+the numbers much.
+
+What the working group eventually accepted is the part most people miss:
+
+<Callout>
+Nobody in the chain *experiences* the ambiguity. The author writes a sentence
+and sees one meaning. The reviewer reads it and sees one meaning. The technician
+reads it and sees one meaning. The failure only appears when those three
+meanings are not the same one — and by then it is in the field.
+</Callout>
+
+You just demonstrated this yourself, three paragraphs into an article that
+warned you it was coming.
+
+An ambiguous sentence does not feel ambiguous. It feels clear. Your brain
+resolves it below the level of awareness and hands you a single confident
+reading. There is no sensation of choosing. There is nothing to catch in review,
+because the reviewer's brain does the same thing, usually the same way — until
+the day someone's brain resolves it differently.
+
+You cannot train a person to notice a question they never experienced asking.
+
+That is why the working group stopped trying to fix people and changed the
+language instead. If the language admits two readings, remove one from the
+language.
+
+<Step>04 — Connecting it to AI</Step>
+
+## The second twist: your best writers are producing your worst prompts
+
+Now put a language model where the technician stood.
+
+It reads fast. It reads under load. It cannot ask a clarifying question. It acts
+on whatever reading it lands on. And — this is the part that matters — it is
+**fluent**, which means it resolves ambiguity exactly the way you just did:
+instantly, silently, and without telling you a choice was made.
+
+A confused human stops and asks. A confused model decides.
+
+So the ambiguity does not disappear. It turns into variance. Run the same agent
+a hundred times and part of what you see is sampling noise — and part of it is a
+distribution over readings of your prompt. Every ambiguous sentence is a branch
+you did not know you wrote, cannot see in a diff, and cannot find in a log,
+because the log shows what the model did, not which reading produced it.
+
+Here is where it gets uncomfortable. Go back and look at what creates that
+ambiguity. Vary your word choice so the writing does not feel repetitive. Be
+concise. Trim redundant words. Combine short sentences into flowing ones. Use
+subordinate clauses to show how ideas relate.
+
+Those are the rules of good writing. Every one of them was taught to you as an
+improvement. Every one of them adds readings.
+
+<PullQuote>
+The person on your team who writes the most elegant English is, in this specific
+context, introducing the most defects — and getting praised for it in review.
+</PullQuote>
+
+Fluency is what makes the problem invisible to the writer. Fluency is also what
+makes the model resolve it silently instead of complaining. The same property,
+at both ends of the pipe.
+
+<Step>05 — The solution</Step>
+
+## Constrain the language, not the people
+
+What that working group produced is
+[ASD-STE100 Simplified Technical English](https://www.asd-ste100.org/), first
+released in 1986 and now on Issue 9, published January 2025. It has two halves.
+
+**53 writing rules**, across nine sections, covering word choice, grammar,
+sentence structure and style. They are hard constraints, not advice. A sentence
+complies or it does not.
+
+**A dictionary of about 900 approved words**, each restricted to one meaning and
+one part of speech, plus roughly 1,200 words to avoid with prescribed
+replacements.
+
+That second half is the severe part. In STE, *fall* is approved to mean "move
+down by the force of gravity." It is not approved to mean "decrease." Pressure
+never falls. Only objects fall. One word, one meaning, permanently.
+
+It is not a style guide. It is closer to a type system for English.
+
+It became mandatory for civil aviation technical publications, then spread to
+defence, rail, automotive, oil and gas, and medical devices. It has been free to
+download since 2013.
+
+### The eleven rules that matter
+
+An open-source skill called
+[asd-ste100-skill](https://github.com/danyuchn/asd-ste100-skill) compresses the
+standard into eleven working rules and points them at AI-facing text. This table
+is the single most useful thing in the repo — a 53-rule industrial standard
+reduced to something you can hold in your head.
+
+<div className="table-scroll">
+
+| Rule | Do | Avoid |
+| --- | --- | --- |
+| One word, one meaning | Pick one verb per action and reuse it everywhere | Rotating *check* / *verify* / *confirm* for one action |
+| One part of speech | "Apply oil to the valve" | "Oil the valve" — one word doing two jobs |
+| Active voice | "The agent deletes the file." | "The file is deleted." — the actor is gone |
+| Simple tenses only | "We received the report." | "We have received the report." |
+| One instruction per sentence | "Open the file. Read line 3." | "Open the file and read line 3, then check if it matches." |
+| Sentence length | ≤20 words for instructions, ≤25 for descriptions | Chains of subordinate clauses |
+| Noun clusters | Max 3 stacked nouns: "fuel pump valve" | "high pressure fuel pump inlet valve assembly" |
+| No dropped words | Keep subject, verb and article explicit | Cutting words to save space |
+| Paragraph limits | One topic, max 6 sentences | Paragraphs covering three things |
+| Lists for sequences | Numbered list for 3+ steps or conditions | Burying a sequence in one sentence |
+| Domain terms | Keep needed jargon, define it once | Undefined jargon |
+
+</div>
+
+Two of these are the direct opposite of what you were taught, which is exactly
+why they work.
+
+**One word, one meaning** forbids synonym variety. If you call something a
+*workspace* in one paragraph and a *project* in the next, a model must assume
+you mean two different things — in technical writing, a new word usually signals
+a new concept. Repetition is a feature.
+
+**No dropped words** forbids the instinct to tighten. Shortening a sentence
+feels like clarifying it, and often does the reverse. "Files not backed up will
+be lost" saves three words and leaves it genuinely unclear which files are at
+risk.
+
+<Step>06 — Practical examples</Step>
+
+## What this looks like on real text
+
+Each example below starts on *Before*. Switch it and watch what happens to the
+sentence count.
+
+<BeforeAfter
+  title="A tool description"
+  beforeWords="44"
+  afterWords="39"
+  before="This tool will attempt to synchronize state across the various backends that have been configured, and if a conflict is detected it may resolve it automatically depending on the strategy that has been set, or otherwise it will surface the conflict for manual review."
+  flags="Two instructions in one sentence — sync, and resolve or surface. | Stacked hedges: have been configured, may resolve, has been set. | Nearly double the 25-word cap for descriptions."
+  after="The tool synchronizes state across the configured backends. If it finds a conflict, it checks the current strategy. If the strategy allows automatic resolution, the tool resolves the conflict. If not, the tool reports the conflict for manual review."
+/>
+
+<BeforeAfter
+  title="An error message"
+  beforeWords="27"
+  afterWords="25"
+  before="An error may have occurred while processing your request due to a possible mismatch in the expected data format, which could be caused by an outdated client version."
+  flags="Passive with no actor — what failed? | Double hedge: may have occurred, could be caused. | Two separate claims in one sentence."
+  after="The request failed. The data format did not match what the server expected. Check your client version — an outdated client is the most common cause."
+/>
+
+<BeforeAfter
+  title="An instruction between two agents"
+  beforeWords="36"
+  afterWords="32"
+  before="Once the upstream job has completed and assuming no errors were raised, the downstream agent should proceed to consume the output artifact, though it is worth noting that partial artifacts are sometimes produced under timeout conditions."
+  flags="Three facts in one sentence: a condition, an action, a warning. | Present perfect plus stacked subordinate clauses. | Well over the 20-word cap for instructions."
+  after="Wait for the upstream job to finish with no errors. Then read the output artifact. Warning: a timeout can produce a partial artifact. Check the artifact is complete before you use it."
+/>
+
+Notice what the rewrites share. They are longer in sentence count and shorter in
+sentence length. Nothing was deleted. The information was *unpacked*.
+
+<Step>07 — The tool</Step>
+
+## What the repo actually gives you
+
+It is small: five files, about 2,300 words of markdown, MIT licensed, no code.
+It runs a fixed five-step process.
+
+1. Read the whole text once for meaning, before changing anything.
+2. Go sentence by sentence and flag every rule violation.
+3. Rewrite each flagged sentence, preserving the meaning exactly.
+4. Output a before/after table naming the rule that was broken.
+5. Add a note on anything left unsimplified, and why.
+
+Install it at user level for Claude Code:
+
+<CopyCommand command="git clone https://github.com/danyuchn/asd-ste100-skill ~/.claude/skills/asd-ste100" />
+
+Or put it in `.claude/skills/` and commit it so the team gets it. Then trigger
+it in plain language: *"Apply STE100 to this tool description."*
+
+There is a third option people overlook. There is no executable code in this
+repo. You can paste the rules table straight into your `CLAUDE.md` and get most
+of the value with no install at all.
+
+**Where it pays off most:** tool and function descriptions first — that string
+is the only thing a model has when deciding whether to call your function. Then
+error messages, which get written for humans and fed to models as fact. Then
+system prompts, which grow for months and never get reread end to end, except by
+the model, on every single call.
+
+<Step>08 — Personal take</Step>
+
+## The best line in the repo is a refusal
+
+Step 3 of that process carries a condition that is easy to skim past. If a
+rewrite would drop a safety condition, a scope qualifier, or a number, the skill
+is instructed to keep the longer wording and flag the trade-off instead of
+simplifying.
+
+And step 5 requires it to report what it deliberately did not change.
+
+Sit with how rare that is. Almost every AI writing tool is built to always
+produce something, because producing something feels like helping. This one is
+built to be able to say: *I left this alone, and here is why.* That single
+design decision is the difference between a tool you can point at a production
+system prompt and one you cannot — because the failure mode of "make this
+clearer" is silently deleting the condition that was doing the most work.
+
+Now the criticism, because the repo deserves an honest reading.
+
+- **The dictionary is missing, and the dictionary is half the standard.** The
+  author says so plainly: the ~900-word approved list belongs to ASD and is free
+  from them, so the skill applies the principle rather than checking against a
+  fixed list. That is the right call ethically and a real functional gap. This
+  will not produce certified STE-compliant documentation.
+- **It rewrites; it does not detect.** No score, no exit code, no report over a
+  folder. It is an interactive assistant, not a check you can run in CI.
+- **It is very new.** One commit, no releases, no tests. Treat it as one
+  person's well-reasoned notes, not a proven product.
+- **Do not point it at anything with a voice.** STE is deliberately flat. Aim it
+  at marketing copy and it will remove exactly what you wanted.
+
+Which leads to the honest verdict: **the automation is not the value. The table
+is.** Somebody reduced a 53-rule industrial standard to eleven checks with real
+numbers attached — 20 words, 25 words, 3 nouns, 6 sentences. Numbers are what
+make a writing rule enforceable instead of aspirational. Those you will still
+remember next month, with or without the skill installed.
+
+<Step>09 — Conclusion</Step>
+
+## Back to the first sentence
+
+Nothing above depends on believing that models are stupid. The opposite,
+actually. The whole argument only works because models are fluent — fluent
+enough to resolve an ambiguous sentence the way you did at the top of this page,
+instantly and without noticing.
+
+Which means this class of bug does not get fixed by the next model release.
+Capability was never the variable. The technicians in those hangars were experts
+too.
+
+The aerospace industry took forty years, seventeen revisions and a regulator to
+arrive at the answer: if a sentence can be read two ways, it eventually will be,
+and the only reliable fix is upstream of the reader.
+
+They had to rebuild a language to get there. You just have to reread your tool
+descriptions.
+
+Start with the longest one. Count the words in the first sentence.
+
+---
+
+[asd-ste100-skill on GitHub](https://github.com/danyuchn/asd-ste100-skill) (MIT)
+· [ASD-STE100 official site](https://www.asd-ste100.org/) — the standard is free
+to download.
+
+This article follows its own rules where it can: short sentences, active voice,
+one idea at a time. It reads a little flatter than it otherwise would. That is
+the trade.

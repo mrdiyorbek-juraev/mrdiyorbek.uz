@@ -171,6 +171,30 @@
 .prose-portfolio h3 a {
   @apply no-underline;
 }
+/* Tables were unstyled — a wide rules table would otherwise render as raw
+   browser defaults and overflow the column on a phone. */
+.prose-portfolio table {
+  @apply w-full border-collapse text-sm;
+}
+.prose-portfolio thead th {
+  @apply border-b border-border bg-muted/40 px-4 py-2.5 text-left align-top text-xs font-medium uppercase tracking-wider text-muted-foreground;
+}
+.prose-portfolio tbody td {
+  @apply border-b border-border/60 px-4 py-3 align-top;
+}
+.prose-portfolio tbody tr:last-child td {
+  @apply border-b-0;
+}
+.prose-portfolio tbody td:first-child {
+  @apply font-medium text-foreground;
+}
+/* Any table narrower than its content scrolls itself rather than the page. */
+.prose-portfolio .table-scroll {
+  @apply my-6 overflow-x-auto rounded-xl border border-border/70;
+}
+.prose-portfolio hr {
+  @apply my-10 border-border/70;
+}
 
 /* ---- Design utilities ---- */
 
