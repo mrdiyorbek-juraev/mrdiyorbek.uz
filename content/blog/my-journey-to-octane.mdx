@@ -13,7 +13,7 @@ Loyihaga yuqori darajada moslashuvchan rich-text editor implement qilishim kerak
 
 ## Lexical men o'ylagandan murakkabroq edi
 
-Implementatsiya davomida esa Lexical men o'ylagandan ancha murakkab ekanligini tushundim. Editor state, node hierarchy, command system, update lifecycle, node transforms, selection APIs, serialization va reconciliation... Har kuni yangi narsalarni o'rganardim va tabiiyki, ko'plab muammolarga ham duch kelardim.
+Implementatsiya davomida esa Lexical men o'ylagandan ancha murakkab ekanligini tushundim. Editor state, node hierarchy, command system, update lifecycle, node transforms, selection APIs, serialization va reconciliation... Har kuni yangi narsalarni o'rganardim va tabiiyki, ko'plab muammolarga ham duch kelardim. O'sha paytlar AI u darjada rivojlanmanga, qiyin savollarga javoblarni community'dan topilardi. 
 
 Shu paytda men Lexical community'dagi tavakkal bir kishiga, Dominic'ga yozishni boshladim. Tushunmagan har bir narsani so'rardim, u esa nafaqat yechimini, balki nima uchun aynan shunday qilish kerakligini ham tushuntirib berardi.
 
@@ -35,7 +35,75 @@ Keyin qadam-baqadam Octane core — Compiler va Runtime qismlariga tusha boshlad
 
 Bugungi kungacha 25–30 ga yaqin pull request create qildim.
 
-## Ortga qarab
+## Jamoamiz bilan tanishing
+
+<OctaneTeam />
+
+Jamoamizdagilarning deyarli barchasi Founder, kuchli tajribaga ega bo'lgan engineerlar. React'ning Core qismni yozganlardan
+tortib, [TanStack Query](https://tanstack.com/query) asoschisi Tanner Linsley va
+TanStack'ning boshqa asosiy maintainerlarigacha; OpenAI Engineerlari; Next.js
+Team Leadi Jimmy Lai.
+
+Yana shuni aytishim kerakki,  IT sohasiga endi kirib kelgan
+paytlarim [Jack Herrington](https://youtube.com/c/JackHerrington)ning YouTube
+videolaridan juda ko'p narsa o'rgangandim — o'shanda u men uchun ekrandagi
+ustoz edi. Bugun esa biz bir jamoadamiz.
+
+## Keling bir narsaga to'htalsak, Octane o'zi nima?
+
+<img src="/blog/octane-logo.svg" alt="OctaneJS logotipi" width="72" height="72" />
+
+[Octane](https://octanejs.dev) — Inferno'ning davomchisi bo'lgan tezkor
+JavaScript UI framework. Uni Dominic Gannaway yaratgan: u Inferno muallifi,
+shuningdek React, Svelte, Lexical va Ripple ustida ishlagan.
+
+G'oyasi sodda: siz o'zingiz o'rgangan React API'da yozaverasiz, qolgan og'ir
+ishni kompilyator bajaradi.
+
+### Nimasi bilan ajralib turadi
+
+**Virtual DOM yo'q.** Template'lar klonlanadigan node'larga va to'g'ridan-to'g'ri
+DOM yozuvlariga kompilyatsiya qilinadi. Ya'ni ish runtime'da emas, build
+vaqtida bajariladi.
+
+**Rules of Hooks yo'q.** Hook'ni shart ichida yoki early return'dan keyin ham
+chaqirish mumkin, chunki slot'lar chaqiruv tartibi bo'yicha emas, chaqiruv joyi
+bo'yicha belgilanadi.
+
+**Dependency array yozish shart emas.** Kompilyator effect, memo va
+callback'laringiz aslida nimadan foydalanayotganini o'zi aniqlaydi — React'dagi
+eng ko'p uchraydigan xatolar manbai shu bilan yo'qoladi.
+
+**Yaxshilangan async.** Bir-biriga bog'liq bo'lmagan `use()` chaqiruvlari daraxt
+bo'ylab birma-bir suspend bo'lish o'rniga birgalikda ishga tushadi. Streaming
+SSR esa har bir boundary tayyor bo'lishi bilan yuboradi.
+
+**Tezlik.** [Rasmiy benchmark'larda](https://octanejs.dev/benchmarks) barcha
+suite'lar bo'yicha geometrik o'rtacha React 19'dan ~2.5 barobar, Preact 10'dan
+~2.7 barobar tezroq.
+
+**Migratsiya uchun ilovani qayta yozish shart emas.** Mavjud React 19
+ilovangizga `OctaneCompat` orqali "Octane islands"larni bitta komponentdan
+boshlab qo'shib borasiz — SSR va hydration ham ishlaydi. Faqat React Server
+Components ko'chmaydi; qolgani (hooks, Suspense, context, SSR) ishlayveradi.
+
+**Ekotizim.** State, data, routing, UI, forms, charts va 3D uchun **52 ta**
+rasmiy binding, jumladan TanStack, React Three Fiber, Lynx va StyleX
+integratsiyalari.
+
+**Sinovdan o'tgan.** Runtime, kompilyator, SSR va binding'lar bo'ylab
+11 500+ test bajarilgan; core suite'ning o'zida 3 900+ alohida holat bor.
+
+<Callout>
+**Eslatma:** Octane hali beta bosqichida, ba'zi binding'lar esa
+texnik-preview holatida (masalan `@octanejs/three`). 
+</Callout>
+
+Boshlash uchun: [Documentations](https://octanejs.dev/docs),
+[Quick Start](https://octanejs.dev/docs/quick-start) va
+[GitHub](https://github.com/octanejs/octane).
+
+## Xulosa
 
 Ortga qarasam, bularning hammasi bitta oddiy taskdan boshlangan ekan.
 
@@ -46,4 +114,4 @@ Bu esa mening Octane'ga bo'lgan sayohatimning boshlanishi edi.
 
 Sayohatim davomida hamrohlik qilmoqchi bo'lsangiz, birga davom etamiz.
 
-**Just join me and let's win together.**
+**Just join me and let's win together.** [Telegram: @Diyorbek_dev](https://t.me/Diyorbekk_dev)

@@ -209,6 +209,22 @@
   @apply my-10 border-border/70;
 }
 
+/* Escape hatch for components rendered inside an article.
+   `not-prose` normally comes from the Tailwind Typography plugin, which this
+   project does not use — the rules above are hand-written, so the class was a
+   no-op and article styles bled into every embedded component: list bullets on
+   a card grid, paragraph margins inside a caption. These give it meaning. */
+.prose-portfolio .not-prose ul,
+.prose-portfolio .not-prose ol {
+  @apply my-0 list-none space-y-0 pl-0;
+}
+.prose-portfolio .not-prose li {
+  @apply my-0;
+}
+.prose-portfolio .not-prose p {
+  @apply my-0;
+}
+
 /* ---- Design utilities ---- */
 
 /* Subtle dotted / grid backdrop for the hero */

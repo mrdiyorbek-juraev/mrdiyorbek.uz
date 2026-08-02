@@ -11,6 +11,7 @@ import { AmbiguityQuiz } from "@/components/mdx/ambiguity-quiz";
 import { BeforeAfter } from "@/components/mdx/before-after";
 import { CopyCommand } from "@/components/mdx/copy-command";
 import { Callout, PullQuote, Step } from "@/components/mdx/callout";
+import { OctaneTeam } from "@/components/mdx/octane-team";
 
 /**
  * Components a post can use by name in MDX. Client components are fine here —
@@ -21,6 +22,7 @@ const components = {
   BeforeAfter,
   Callout,
   CopyCommand,
+  OctaneTeam,
   PullQuote,
   Step,
   a: ({ href = "", ...props }: ComponentPropsWithoutRef<"a">) => {

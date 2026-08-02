@@ -5,6 +5,8 @@ import type { SVGProps } from "react";
 export {
   SiTelegram as TelegramIcon,
   SiGoogle as GoogleIcon,
+  SiBluesky as BlueskyIcon,
+  SiYoutube as YouTubeIcon,
 } from "@icons-pack/react-simple-icons";
 
 export function GitHubIcon(props: SVGProps<SVGSVGElement>) {
