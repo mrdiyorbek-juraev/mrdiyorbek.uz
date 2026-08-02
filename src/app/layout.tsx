@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { siteConfig } from "@/lib/site";
@@ -10,9 +11,26 @@ import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/query-provider";
 
-const geistSans = Geist({
+/**
+ * Wotfard is a paid licence, so it is self-hosted rather than fetched.
+ *
+ * Only the .woff2 lives in the repo, and deliberately not under public/ —
+ * everything there is served at a guessable URL, which would have published
+ * the desktop .otf and the licence PDFs alongside it. next/font/local emits
+ * this under a hashed path and inlines the @font-face, so there is no extra
+ * round trip and no render-blocking stylesheet.
+ *
+ * Only Regular (400) was licensed; see the note on synthetic bold below.
+ */
+const wotfard = localFont({
+  src: "./fonts/wotfard-regular.woff2",
   variable: "--font-sans",
-  subsets: ["latin"],
+  weight: "400",
+  style: "normal",
+  display: "swap",
+  // Metric-matched fallback, so swapping from the system font when Wotfard
+  // arrives doesn't reflow the page.
+  adjustFontFallback: "Arial",
 });
 
 const geistMono = Geist_Mono({
@@ -111,7 +129,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${wotfard.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <script
