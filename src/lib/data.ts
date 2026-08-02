@@ -1,24 +1,35 @@
+/**
+ * Placeholder for a section that has no posts behind it yet.
+ *
+ * Deliberately inert: no href, and views are 0 rather than invented. The
+ * previous version advertised 1,577 / 4,917 / 3,381 views on retrospectives
+ * that were never written, and every card linked to /blog — a reader clicking
+ * "The 2025 Retrospective" landed somewhere else entirely.
+ *
+ * When the real posts exist, give each one a `href` and the cards become
+ * links again on their own.
+ */
 export const retros = [
   {
     year: 2025,
-    views: 1577,
+    views: 0,
     title: "The 2025 Retrospective",
-    description: "Travels, Three Diving Licenses, and Trading Money for Memories",
-    href: "/blog",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    href: undefined,
   },
   {
     year: 2024,
-    views: 4917,
+    views: 0,
     title: "The 2024 Retrospective",
-    description: "First Full-Time Year, Solo Travel while Working, Socializing, and more!",
-    href: "/blog",
+    description: "Sed do eiusmod tempor incididunt ut labore et dolore magna.",
+    href: undefined,
   },
   {
     year: 2023,
-    views: 3381,
+    views: 0,
     title: "The 2023 Retrospective",
-    description: "Graduation, Tech Writing, First Job, Mentorship, and more!",
-    href: "/blog",
+    description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco.",
+    href: undefined,
   },
 ] as const;
 

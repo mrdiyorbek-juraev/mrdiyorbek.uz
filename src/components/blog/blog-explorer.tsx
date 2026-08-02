@@ -17,6 +17,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+/**
+ * Only Uzbek exists today — the sole published post is `lang: uz`. The other
+ * two are listed rather than hidden so the intent is visible, and marked so
+ * nobody clicks expecting a translation.
+ */
+const LANGUAGES = [
+  { code: "uz", label: "O'zbekcha", available: true },
+  { code: "en", label: "English", available: false },
+  { code: "ru", label: "Русский", available: false },
+] as const;
+
 type SortKey = "date-desc" | "date-asc" | "views" | "likes";
 
 const sortLabels: Record<SortKey, string> = {
@@ -212,13 +223,33 @@ export function BlogExplorer({ posts: initial }: { posts: PostWithStats[] }) {
           </div>
 
           <div>
-            <h2 className="mb-2 font-medium">Read in other language?</h2>
-            <a
-              href="#"
-              className="text-sm text-muted-foreground transition-colors hover:text-primary"
-            >
-              Read in Bahasa Indonesia
-            </a>
+            <h2 className="mb-3 font-medium">Read in other language?</h2>
+            <ul className="space-y-1.5">
+              {LANGUAGES.map((language) => (
+                <li key={language.code}>
+                  {language.available ? (
+                    <span
+                      aria-current="true"
+                      className="flex items-center gap-2 text-sm text-foreground"
+                    >
+                      <Check className="size-3.5 text-primary" />
+                      {language.label}
+                    </span>
+                  ) : (
+                    // Not a link and not a <button> — there is nowhere to go
+                    // yet, and a disabled control that does nothing on click
+                    // is worse than plain text that explains itself.
+                    <span className="flex items-center gap-2 text-sm text-muted-foreground/70">
+                      <span aria-hidden className="size-3.5" />
+                      {language.label}
+                      <span className="ml-auto rounded-full border border-border/60 px-1.5 py-px text-[10px] tracking-wide uppercase">
+                        Soon
+                      </span>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </aside>
       </div>
