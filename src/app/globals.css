@@ -56,19 +56,26 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.7 0.16 158);
-  --primary-foreground: oklch(0.16 0.02 165);
+  /* 4.59:1 on white — the old oklch(0.7 0.16 158) was 2.49:1, failing even
+     the 3:1 large-text floor while being used as text in 38 places.
+     Chroma drops with lightness because darker greens at 0.16 fall outside
+     sRGB. Dark theme keeps the bright green; it was already 10.5:1. */
+  --primary: oklch(0.548 0.129 158);
+  /* Flipped to near-white: dark text on the darker primary is only 4.21:1. */
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* 5.51:1, up from 4.73:1 — this carries descriptions, timestamps and the
+     inactive table-of-contents entries, so it is a lot of secondary reading. */
+  --muted-foreground: oklch(0.52 0 0);
   --accent: oklch(0.95 0.03 158);
   --accent-foreground: oklch(0.3 0.08 158);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.7 0.16 158);
-  --brand: oklch(0.75 0.17 158);
+  --ring: oklch(0.548 0.129 158);
+  --brand: oklch(0.62 0.145 158);
   --chart-1: oklch(0.78 0.16 158);
   --chart-2: oklch(0.65 0.15 175);
   --chart-3: oklch(0.6 0.12 200);
@@ -77,12 +84,12 @@
   --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.7 0.16 158);
+  --sidebar-primary: oklch(0.548 0.129 158);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.7 0.16 158);
+  --sidebar-ring: oklch(0.548 0.129 158);
 }
 
 .dark {
@@ -146,8 +153,23 @@
 }
 
 /* Long-form MDX content styling (lightweight, typography-plugin-free) */
+/* Long-form reading measure.
+   The column was 768px at 16px type — about 96 characters per line, well past
+   the 45–75 range where the eye reliably finds the start of the next line.
+   `ch` is the width of a "0", so this tracks the font size instead of pinning
+   a pixel width that drifts whenever the type scale changes. */
 .prose-portfolio {
-  @apply text-base leading-7 text-foreground;
+  @apply text-[1.0625rem] leading-[1.75] text-foreground;
+  max-width: 68ch;
+}
+/* Full-bleed exceptions: these carry their own internal layout and reading
+   measure does not apply to them. */
+.prose-portfolio > figure,
+.prose-portfolio > section,
+.prose-portfolio > .table-scroll,
+.prose-portfolio > img,
+.prose-portfolio > p > img {
+  max-width: none;
 }
 .prose-portfolio h2 {
   @apply mt-10 mb-4 scroll-mt-20 text-2xl font-semibold tracking-tight;
