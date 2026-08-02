@@ -7,6 +7,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypePrettyCode from "rehype-pretty-code";
 
+import { Alert } from "@/components/mdx/alert";
 import { AmbiguityQuiz } from "@/components/mdx/ambiguity-quiz";
 import { BeforeAfter } from "@/components/mdx/before-after";
 import { CopyCommand } from "@/components/mdx/copy-command";
@@ -18,6 +19,7 @@ import { OctaneTeam } from "@/components/mdx/octane-team";
  * next-mdx-remote renders them as islands inside the server-rendered article.
  */
 const components = {
+  Alert,
   AmbiguityQuiz,
   BeforeAfter,
   Callout,
