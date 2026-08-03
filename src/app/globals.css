@@ -202,9 +202,12 @@
 .prose-portfolio [data-line] {
   @apply px-1;
 }
+/* rehype-autolink-headings wraps every heading's text in an <a>, so the link
+   styling above would otherwise paint every heading brand green and underline
+   it. These anchors are navigation affordances, not links in prose. */
 .prose-portfolio h2 a,
 .prose-portfolio h3 a {
-  @apply no-underline;
+  @apply font-[inherit] text-inherit no-underline;
 }
 /* Tables were unstyled — a wide rules table would otherwise render as raw
    browser defaults and overflow the column on a phone. */

@@ -1,0 +1,219 @@
+---
+title: Octane + Next.js yoki OctaneX?
+description: Core Team ichidagi arxitektura muhokamasi - Server Components'dan boshlanib, butun platforma arhitekturasini qayta o'ylab chiqishgacha yetib borgan discussion.
+date: 2026-08-03
+tags: ["octane", "arxitektura", "nextjs", "open-source"]
+published: true
+lang: uz
+---
+
+Kuni kecha Octane core jamoasida juda qiziq architecture discussion bo’lib o’tdi.
+
+<PullQuote>
+  Octane Next.js bilan ishlashi kerakmi yoki Octane o’zining meta framework’iga
+  ega bòlish kerakmi?
+</PullQuote>
+
+Habaringiz bor yaqinda [Jimmy Lai](https://www.linkedin.com/in/feedthejim/)
+(Next.js team lead) ham jamoaga qo'shilgandi, ko'p texnik savollar aynan undan
+so'raldi.
+
+Rostini aytsam, shu vaqtgacha framework architecture’sining low-level qismiga bunchalik chuqur kirib ko’rmagan ekanman.
+
+Muhokama davomida Server Components'dan boshlangan suhbat asta-sekin framework
+dizayni, migratsiya strategiyasi va kelajakdagi platforma arxitekturasigacha
+yetib bordi.
+
+## Muhokama nimadan boshlandi?
+
+Bilsasizki, Next.js'da ikkita imkoniyat bor: **Server Components**
+va **Cache Components**.
+
+Savol oddiy edi: Octane bularni qanday qo'llab-quvvatlashi mumkin?
+
+Lekin oradan ko'p o'tmay muhokama boshqa yo'nalishga burildi. Ko'plab
+dasturchilar Octane'ni mavjud Next.js loyihalarida ishlatishni xohlaydi. Bunga
+erishish uchun esa faqat renderer yozishning o'zi yetarli emas.
+
+Shu nuqtadan boshlab suhbat framework arxitekturasiga buruldi.
+
+## "use server" ortida aslida nima sodir bo'ladi?
+
+Bugungi Next.js'da Client Component ichida funksiyani yozib, unga
+`"use server"` direktivasini qo'shish mumkin. Foydalanish nuqtai nazaridan bu
+juda oddiy ko'rinadi - ammo framework ichida ancha murakkab jarayonlar ishlaydi.
+
+Compiler qaysi kod serverda bajarilishini qanday aniqlaydi? Qaysi qism client
+bundle'ga tushadi? Server bilan client o'rtasidagi bog'lanish qanday saqlanadi?
+
+Discussion davomida aynan shu mexanizm Octane uchun ham muhim dizayn
+qarorlaridan biri ekani ta'kidlandi.
+
+## Har safar direktiva yozish shartmi?
+
+Muhokama davomida qiziqarli taklif ilgari surildi. Agar compiler kodni
+yetarlicha chuqur tahlil qila olsa, nega dasturchi har safar `"use server"`
+yozishi kerak?
+
+Nazariy jihatdan compiler server funksiyalarini avtomatik aniqlashi mumkin.
+Event handler'lar server funksiyalariga ulanadi, hydration vaqtida esa kerakli
+bog'lanishlar DOM elementlariga o'rnatiladi.
+
+Bu React modelini nusxalash emas, balki developer experience'ni
+soddalashtirishga qaratilgan yondashuv sifatida ko'rildi.
+
+## Asosiy savol: Octane qaysi yo'lni tanlashi kerak?
+
+Discussion'ning eng muhim qismi aynan shu yerda boshlandi. Renderer qanday
+ishlashi emas, balki loyiha qaysi strategiyani tanlashi kerakligi muhokama
+qilindi. Hozirda bizda 2 hil variant bor.
+
+<div className="table-scroll">
+
+|                 | Compatibility Layer                          | Octane meta framework                |
+| --------------- | -------------------------------------------- | ------------------------------------ |
+| **Server**      | Next.js ishlashda davom etadi                | Octane'ning o'z platformasi          |
+| **Browser**     | React o'rniga Octane renderer                | Octane, boshidan oxirigacha          |
+| **Migratsiya**  | Mavjud loyihalar katta o'zgarishsiz ko'chadi | Qayta qurish talab qilinadi          |
+| **Qamrov**      | Faqat rendering qatlami                      | Routing, cache, deployment — hammasi |
+| **Murakkablik** | Ancha past                                   | Sezilarli darajada yuqori            |
+
+</div>
+
+### Variant 1 - Compatibility Layer
+
+Birinchi variant amaliy tomondan ancha sodda. Server tomonida Next.js ishlashda
+davom etadi, browser tarafida esa React o'rniga Octane renderer ishlatiladi.
+
+Bunday yondashuvning eng katta afzalligi shundaki, mavjud Next.js loyihalarini
+katta o'zgarishlarsiz Octane'ga ko'chirish mumkin. Migratsiya osonlashadi va
+jamoalar yangi framework'ni bosqichma-bosqich joriy qila oladi.
+
+### Variant 2 - Octane meta framework
+
+Ikkinchi yo'l ancha Complex. Bu yerda maqsad Next.js bilan integratsiya
+emas, maqsad Octane uchun mustaqil platforma yaratish.
+
+Bunday platforma faqat renderer bilan cheklanmaydi. U o'z ichiga routing,
+server functions, cache, metadata, streaming, image optimizatsiyasi, API va
+deployment'ni ham oladi.
+
+Ya'ni gap endi faqat React o'rnini bosish haqida emas. Gap butun platformani
+qayta qurish haqida ketmoqda.
+
+## Nega bu shunchalik murakkab?
+
+Discussion davomida juda muhim fikr bildirildi. Agar maqsad "istalgan Next.js
+loyihasini Octane'ga ko'chirish" bo'lsa, rendererning o'zi yetarli emas.
+Quyidagi mexanizmlarni ham qo'llab-quvvatlash talab qilinadi:
+
+- React Server Components
+- Flight Protocol
+- Cache Components
+- Server Actions
+- Streaming
+- Partial Prerendering
+
+Bularning ustiga feature parity, test infratuzilmasi, CI va uzoq muddatli
+maintenance ham qo'shiladi.
+
+Shu sababli discussion davomida Compatibility Layer birinchi bosqich uchun ancha
+realistik yo'nalish sifatida baholandi.
+
+## Dastlabki prototip nimalarni ko'rsatdi?
+
+Muhokama davomida Next.js plugin prototipi Jimmy tomonidan ko'rsatildi. Unda Next.js server
+qismi o'zgarishsiz qolgan, browser tomonida esa ReactDOM o'rniga Octane
+ishlatilgan.
+
+Natijalar ijobiy bo'ldi: JavaScript hajmi kamaydi, decode qilinadigan kod
+qisqardi, interaction tezroq tayyor bo'ldi va Long Task'lar deyarli yo'qoldi.
+
+Bu Octane mavjud Next.js ilovalariga integratsiya qilinishi mumkinligini amalda
+ko'rsatdi.
+
+<Alert variant="warning" title="Ammo bitta muhim cheklov bor edi">
+  Next.js rendering qatlami React bilan juda chuqur bog'langan. Plugin yozish
+  mumkin, lekin React va ReactDOM dependency sifatida baribir saqlanib qoladi.
+  Octane'ning barcha afzalliklaridan foydalanish uchun esa Next.js ichki
+  arxitekturasiga ancha chuqur kirish kerak bo'ladi.
+</Alert>
+
+## Native prototip
+
+Keyinchalik React butunlay olib tashlangan yana bir prototip sinab ko'rildi.
+Natijalar yanada sezilarli darajada bo'ldi.
+
+<div className="table-scroll">
+
+| Ko'rsatkich      | Natija           |
+| ---------------- | ---------------- |
+| JavaScript hajmi | **67.9%** kam    |
+| Decode           | **70.2%** kam    |
+| Hydration        | **49.8%** tezroq |
+| Load             | **37%** tezroq   |
+
+</div>
+
+Bu prototipda React, ReactDOM va Browser Flight umuman ishlatilmagan.
+
+<Alert variant="warning" title="Eslatma">
+  Bu hali tadqiqot bosqichidagi prototip va unda ayrim soddalashtirilgan
+  yechimlardan foydalanilgan. Raqamlarni yakuniy ko'rsatkich sifatida emas,
+  yo'nalishning ishlashini tasdiqlovchi dalil sifatida o'qish to'g'riroq.
+</Alert>
+
+## Next.js bunga tayyormi?
+
+Discussion davomida yana bir savol ko'tarildi. Agar Octane Next.js ichiga
+renderer sifatida ulanadigan bo'lsa, bunday integratsiyani Next.js jamoasi
+qo'llab-quvvatlashga tayyormi?
+
+Bu yerda muammo texnik emas. Agar Next.js rasmiy ravishda bir nechta
+rendererlarni qo'llab-quvvatlasa, har bir yangi o'zgarish barcha rendererlar
+bilan mos ishlashini tekshirishi kerak bo'ladi. Buning Cost'i esa ancha baland.
+
+Shu sababli bunday integratsiya yaqin kelajakda real ssenariy sifatida
+ko'rilmadi.
+
+## Muhokama qayerga olib keldi?
+
+Discussion oxiriga kelib savol butunlay o'zgardi.
+
+Asosiy savol:
+
+<PullQuote>Octane o'zining meta framework'ini yaratishi kerakmi?</PullQuote>
+
+Muhokama davomida bu loyiha uchun hatto nom ham tilga olindi - **OctaneX**.
+G'oya shundan iboratki, renderer emas, balki to'liq meta framework yaratiladi.
+
+## Agentic First Framework
+
+Muhokamaning eng qiziqarli g'oyalaridan biri AI agentlari bilan bog'liq edi.
+Framework boshidan AI agentlari bilan ishlashni hisobga olgan holda
+loyihalanishi mumkin.
+
+Masalan, framework bilan birga ishlaydigan kichik MCP server mavjud bo'ladi.
+Natijada AI agentlari framework API'lari, analytics, performance ma'lumotlari
+va boshqa imkoniyatlardan to'g'ridan-to'g'ri foydalanishi mumkin.
+
+Endi tasavur qiling, agar framework AI tushunolishi uchun professinal tarzda moslab qurilsa, performancedan muammo bo'lmasa, ishonib aytolamanki bu yondashuv kelajakdagi framework dizaynida muhim ro'l o'ynashi aniq. Kichik tahminlarim bor agar Octane buni isbotlay olsa boshqa frameworklar ham shu yo'lga o'tishi mumkin.
+
+## Xulosa
+
+Bu discussion yana bir bor shuni ko'rsatdiki, yangi renderer yaratish -
+framework yaratishning faqat boshlanishi. Asl murakkablik uning atrofidagi butun
+platformani loyihalashda: routing, Server Components, caching, deployment,
+developer experience, migratsiya. Va eng muhimi - uzoq muddat davomida
+qo'llab-quvvatlanadigan ekotizim.
+
+Shu sababli Octane oldidagi eng katta savol endi "NextJs'da React'ni qanday
+almashtiramiz?" emas. Balki: **"Keyingi avlod frontend platformasini qanday
+quramiz?"**
+
+Mening nazarimda Octane o'zining Meta frameworkni yaratadi, NextJsga huddi alternative tarzda.
+
+---
+
+Yangiliklarni Telegram kanalimda kuzatib borishingiz mumkin:
+[@Diyorbek_dev](https://t.me/Diyorbekk_dev)

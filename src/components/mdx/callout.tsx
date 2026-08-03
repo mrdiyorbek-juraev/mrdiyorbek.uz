@@ -32,18 +32,25 @@ export function Callout({
 export function PullQuote({ children }: { children: ReactNode }) {
   return (
     <div className="my-10 border-y-2 border-foreground/80 py-6">
-      <p className="text-xl font-semibold leading-snug tracking-tight sm:text-2xl [&>strong]:text-primary">
+      {/* div, not p. MDX wraps a component's children in a <p> as soon as they
+          span more than one line, and a <p> inside a <p> is invalid HTML that
+          React reports as a hydration error. Single-line usage stayed inline
+          and looked fine, which is what made it intermittent.
+          [&>p]:my-0 strips the article paragraph margin off that wrapper. */}
+      <div className="text-xl font-semibold leading-snug tracking-tight sm:text-2xl [&>p]:my-0 [&>strong]:text-primary">
         {children}
-      </p>
+      </div>
     </div>
   );
 }
 
 /** Small monospace section marker, mirroring the essay's numbered structure. */
 export function Step({ children }: { children: ReactNode }) {
+  // div for the same reason as PullQuote — a bare <p> here breaks the moment
+  // someone writes the label across two lines.
   return (
-    <p className="mt-12 mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-primary">
+    <div className="mt-12 mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-primary [&>p]:my-0">
       {children}
-    </p>
+    </div>
   );
 }
