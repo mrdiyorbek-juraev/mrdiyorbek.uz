@@ -13,6 +13,7 @@ import { BeforeAfter } from "@/components/mdx/before-after";
 import { CopyCommand } from "@/components/mdx/copy-command";
 import { Callout, PullQuote, Step } from "@/components/mdx/callout";
 import { OctaneTeam } from "@/components/mdx/octane-team";
+import { VideoFrame } from "@/components/mdx/video-frame";
 
 /**
  * Components a post can use by name in MDX. Client components are fine here —
@@ -27,6 +28,7 @@ const components = {
   OctaneTeam,
   PullQuote,
   Step,
+  VideoFrame,
   a: ({ href = "", ...props }: ComponentPropsWithoutRef<"a">) => {
     const isInternal = href.startsWith("/") || href.startsWith("#");
 
