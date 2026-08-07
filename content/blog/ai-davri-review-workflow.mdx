@@ -1,0 +1,263 @@
+---
+title: The AI Era Needs a Better Review Workflow
+description: AI agentlar minglab qatorlik PR'larni bir necha daqiqada yozadi, code review esa bosh og'riq bo'lishni boshladi. Stacked Pull Request shu muammoli vaziyatga yechim bo'lishi mumkin.
+date: 2026-08-07
+tags: ["ai", "github", "code-review", "workflow"]
+published: true
+lang: uz
+---
+
+Keling, muammoga oldingi va hozirgi development jarayonini solishtirish orqali
+boramiz.
+
+Ilgari development'da eng ko'p vaqt talab qiladigan qism - kod yozish edi.
+Murakkab feature'lar bir necha kun, ba'zan esa bir necha hafta olardi. Shuning
+uchun jamoalar butun e'tiborini coding jarayonini tezlashtirishga qaratardi.
+
+Hozir esa AI agentlar tomonidan minglab change'lar qilingan giant PR'larni review qilish engineerlar uchun haqiqiy bosh og'rig'iga aylana boshladi.
+
+## Katta PR'lar nima uchun muammo?
+
+Tasavvur qiling: AI yordamida bitta feature ustida ishladingiz va oxirida
+1500–2000 qatorlik Pull Request ochdingiz. Texnik jihatdan hammasi to'g'ri
+bo'lishi mumkin. Ammo reviewer uchun bu oson emas.
+
+Bir vaqtning o'zida biznes logikasi, API o'zgarishlari, database, UI va
+refactor'larni ko'rib chiqish katta mental yuk talab qiladi. Natijada:
+
+- review kechikadi;
+- merge kechikadi;
+- branch eskiradi;
+- konfliktlar ko'payadi.
+
+Oxir-oqibat AI sizga vaqt tejagan bo'lsa ham, jamoa umumiy hisobda yutmaydi.
+
+## Muammo AI sabablimi?
+
+Men buni AI muammosi deb o'ylamagan bo'lardim. Aslida esa AI faqat allaqachon mavjud
+bo'lgan muammoni tezroq yuzaga chiqardi.
+
+Shuning uchun katta PR'lar kamroq uchrardi. Endi esa AI bunday PR'larni bir necha daqiqada tayyorlay oladi. Review jarayoni esa hali ham inson tezligida ishlaydi.
+
+To'g'ri, "PR reviewer agentlardan foydalansak-chi?" degan fikr tug'ilishi mumkin. Lekin review jarayonini to'liqligicha AI'ga topshirish katta xatolarga olib kelishi mumkin. Hech bo'lmaganda hozircha men AI agentlarga review jarayonini to'liq ishonib topshirmagan bo'lardim.
+
+## Yechim: Stacked PR nima?
+
+Sizga bir taklif: bitta katta feature'ni bitta ulkan Pull Request sifatida
+yuborish o'rniga, uni mantiqiy qismlarga bo'lsak-chi?
+
+<div className="table-scroll">
+
+| Pull Request | Qamrovi        |
+| ------------ | -------------- |
+| **PR 1**     | API            |
+| **PR 2**     | Data Layer     |
+| **PR 3**     | Business Logic |
+| **PR 4**     | UI             |
+
+</div>
+
+Har bir PR oldingisiga tayanadi, lekin alohida review qilinadi. Reviewer butun
+feature'ni birdaniga emas, bosqichma-bosqich tushunadi. Natijada review'ning
+sifati ham, tezligi ham oshadi.
+
+## AI + Stacked PR
+
+Mening fikrimcha, AI va Stacked PR bir-birini juda yaxshi to'ldiradi.
+
+Kelajakdagi workflow taxminan quyidagicha bo'lishi mumkin: bir agent API
+qatlamini yozadi, ikkinchisi business logic ustida ishlaydi, uchinchisi UI
+yaratadi. Har biri alohida Pull Request ochadi va review ham qatlamlar bo'yicha
+ketadi.
+
+Bir vaqtning o'zida bir nechta kichik PR'ni ko'rib chiqish 2000 qatorlik bitta
+PR'ni review qilishdan ancha oson.
+
+## Qanday ishlaydi?
+
+GitHub endi Stacked Pull Request'larni native tarzda qo'llab-quvvatlaydi. Uni
+GitHub'ning Pull Request interfeysi orqali ham, terminaldagi `gh stack` CLI
+yordamida ham boshqarish mumkin.
+
+Agar `gh` CLI ishlatayotgan bo'lsangiz, extension'ni quyidagicha o'rnatasiz:
+
+<CopyCommand command="gh extension install github/gh-stack" />
+
+Skill'lar bilan esa bu jarayon yanada osonlashadi:
+
+<CopyCommand command="gh skill install github/gh-stack" />
+
+<CopyCommand command="npx skills add github/gh-stack" />
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/gh-skill-install.mp4"
+  caption="gh-stack skill'ini o'rnatish"
+/>
+
+Bu yondashuvda har bir AI agent faqat o'ziga biriktirilgan vazifa ustida
+ishlaydi. Natijada har bir Pull Request bitta aniq vazifani bajaradi va review
+jarayoni ancha soddalashadi.
+
+## Qatlamlarga ajratib ko'ramiz
+
+<div className="table-scroll">
+
+| Layer / branch          | Agent             | Nimaga javob beradi          |
+| ----------------------- | ----------------- | ---------------------------- |
+| L1 `feat/catalog-data`  | Data modeler agent | Data model va katalog asosi  |
+| L2 `feat/search-api`    | Backend agent     | Mahsulot qidiruv API'si      |
+| L3 `feat/chat-grounding` | Frontend agent   | Chat va API integratsiyasi   |
+| L4 `feat/grounded-ui`   | Frontend agent    | UI va citation komponentlari |
+
+</div>
+
+Endi faqat CI tayyor ekanini tasdiqlash qoladi. Stack ichidagi har bir Pull
+Request stack base bilan solishtiriladi va har bir layer uchun CI tekshiruvlari
+alohida bajariladi. Shu sababli har bir bosqich mustaqil tekshiriladi va
+muammolar erta aniqlanadi.
+
+### 1-layer — Data Catalog Foundation
+
+Data Modeler agenti yangi stack yaratadi, birinchi branch'ni ochadi va data
+layer ustida ishlaydi. Kod yozilgach, test va validatsiyalar ishga tushadi.
+Hammasi muvaffaqiyatli o'tsa, layer commit qilinadi. Aks holda agent muammolarni
+tuzatib, qayta urinadi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/layer1-data.mp4"
+  caption="1-layer: data model va katalog asosi"
+/>
+
+### 2-layer — Product Search API
+
+Backend agenti ikkinchi layer'ni yaratadi va birinchi layer ustiga API qismini
+qo'shadi. API to'g'ri ishlab, barcha tekshiruvlardan o'tsa, layer commit
+qilinadi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/layer2-backend.mp4"
+  caption="2-layer: qidiruv API'si birinchi layer ustiga qurilmoqda"
+/>
+
+### 3-layer — Chat Integration
+
+Frontend agenti chat va API integratsiyasini amalga oshiradi. Testlardan
+muvaffaqiyatli o'tgach, layer commit qilinadi. Reviewer esa faqat API
+integratsiyasi va fallback holatlarini ko'rib chiqadi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/layer3-frontend.mp4"
+  caption="3-layer: chat integratsiyasi va fallback holatlari"
+/>
+
+### 4-layer — Grounded UI
+
+Oxirgi layer'da frontend agenti UI va citation komponentlarini yaratadi. Browser
+testlari muvaffaqiyatli o'tgach, layer commit qilinadi.
+
+Bu layer alohida ajratilganining sababi shundaki, UI'ni review qilayotgan odam
+data flow'ni tekshirishi shart emas. Xuddi shunday, data owner ham UI
+tafsilotlariga kirib o'tirmaydi. Reviewer faqat UI, loading, empty va error
+holatlarini hamda har bir citation to'g'ri mahsulotga bog'langanini tekshiradi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/layer4-frontend.mp4"
+  caption="4-layer: UI va citation komponentlari"
+/>
+
+## Stack'ni submit qilish
+
+Barcha layer'lar tayyor. Endi ularni GitHub'ga yuborish va Stacked Pull Request
+sifatida ochish kerak.
+
+<CopyCommand command="gh stack push" />
+
+So'ng Pull Request'larni yaratamiz:
+
+<CopyCommand command="gh stack submit" />
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/gh-stack-submit.mp4"
+  caption="gh stack submit — butun stack bir buyruq bilan PR'larga aylanadi"
+/>
+
+## Stack Map va CI
+
+GitHub'da barcha Pull Request'lar ochilgach, har birining yuqori qismida Stack
+Map ko'rinadi. U stack ichidagi PR'lar o'rtasida bir marta bosish orqali
+harakatlanish imkonini beradi. Har bir layer esa o'zining CI tekshiruvlaridan
+mustaqil ravishda o'tadi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/stack-map.mp4"
+  caption="Stack Map: PR'lar orasida bir bosishda harakatlanish"
+/>
+
+## Review jarayoni
+
+Endi reviewer nuqtai nazaridan qaraymiz. Stack Map stack ichidagi barcha Pull
+Request'lar orasida osongina harakatlanishga yordam beradi.
+
+<Alert variant="tip" title="Eng yaxshi yondashuv">
+  **Yuqoridan pastga o'qing** — feature'ning umumiy maqsadini tushunish uchun.
+  **Pastdan yuqoriga review qiling** — chunki har bir layer oldingisiga tayanadi.
+</Alert>
+
+Natijada 1700+ qatorlik bitta ulkan Pull Request o'rniga, bir nechta kichik va
+mustaqil PR'ni review qilasiz. Bu esa jarayonni ancha sodda va samarali qiladi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/compare-before-and-after-improved.mp4"
+  caption="Bitta ulkan PR va stack — yonma-yon taqqoslash"
+/>
+
+## Review'dan keyingi o'zgarishlar
+
+Faraz qilaylik, reviewer birinchi layer'da ikkita muammoni topdi va ularni
+tuzatishni so'radi. Data Modeler agenti feedback asosida kodni yangilaydi,
+testlarni qayta ishga tushiradi va o'zgarishlarni push qiladi.
+
+Biroq birinchi layer o'zgargani sababli, undan keyingi barcha layer'lar eski
+commit'ga tayanib qoladi. GitHub buni avtomatik aniqlaydi va stack'ni qayta
+rebase qilish kerakligini bildiradi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/gh-stack-rebase.mp4"
+  caption="Pastki layer o'zgargach, GitHub rebase kerakligini o'zi aytadi"
+/>
+
+## Stack'ni yangilash
+
+Agar pastki layer o'zgarsa, stack'dagi qolgan layer'larni ham yangilash kerak
+bo'ladi. GitHub'da buni **Rebase Stack** tugmasi orqali qilish mumkin.
+
+<Alert variant="warning" title="Rebase Stack tugmasi haqida">
+  U GitHub serverlarida ishlaydi, shuning uchun ayrim holatlarda commit
+  imzolariga (signed commits) yoki committer ma'lumotlariga ta'sir qilishi
+  mumkin. Shu sababli terminal orqali bajarish xavfsizroq.
+</Alert>
+
+<CopyCommand command="gh stack rebase" />
+
+Rebase tugagach, barcha layer'larni GitHub bilan sinxronlaymiz:
+
+<CopyCommand command="gh stack sync" />
+
+Natijada stack'dagi barcha Pull Request'lar yangilanadi, CI qayta ishga tushadi
+va barcha tekshiruvlardan muvaffaqiyatli o'tgach, stack yana merge qilishga
+tayyor holatga keladi.
+
+<VideoFrame
+  src="https://github.blog/wp-content/uploads/2026/08/gh-stack-sync-lc.mp4"
+  caption="gh stack sync — butun stack GitHub bilan sinxronlanmoqda"
+/>
+
+## Xulosa
+
+Menimcha, yaqin kelajakda "bitta feature - bitta PR" odati asta-sekin o'rnini
+"bitta feature - bitta stack" yondashuviga bo'shatib berishi mumkin.
+
+---
+
+Yangiliklarni Telegram kanalimda kuzatib borishingiz mumkin:
+[@Diyorbek_dev](https://t.me/Diyorbekk_dev)
